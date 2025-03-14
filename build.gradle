@@ -55,6 +55,7 @@ dependencies {
 	implementation 'org.springframework:spring-aspects'
 	testFixturesImplementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
 	testFixturesImplementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
+
 }
 
 tasks.named('test') {
