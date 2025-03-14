@@ -3,16 +3,7 @@ name: feat-issue-template
 about: 기능 이슈 발행 시 사용하는 템플릿
 title: ''
 labels: "\U0001F4AB feat"
-assignees: Duhikim, Isonade2, UncleSamsun, p-seonggeun
-
----
-
----
-name: feat issue template
-about: 이슈를 생성해주세요.
-title: 'feat: 작업 제목'
-labels: 'feat'
-assignees: ''
+assignees: Duhikim, Isonade2, p-seonggeun, UncleSamsun
 
 ---
 

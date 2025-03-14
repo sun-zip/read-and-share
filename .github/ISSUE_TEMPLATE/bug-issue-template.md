@@ -7,15 +7,6 @@ assignees: Duhikim, Isonade2, p-seonggeun, UncleSamsun
 
 ---
 
----
-name: bug issue template
-about: 이슈를 생성해주세요.
-title: 'fix: 작업 제목'
-labels: 'fix'
-assignees: ''
-
----
-
 ## 🤮 As Is (오마이갓 비상사태)
 > 어떤 상황에서 발생한 버그인지 설명해주세요. (육하원칙이면 더 좋아요!)
 

@@ -7,15 +7,6 @@ assignees: Duhikim, Isonade2, p-seonggeun, UncleSamsun
 
 ---
 
----
-name: refactor issue template
-about: 이슈를 생성해주세요.
-title: 'refactor: 작업 제목'
-labels: 'refactor'
-assignees: ''
-
----
-
 ## 🤮 As Is
 > 리팩터링하고자 하는 파트와 이유를 구체적으로 설명해주세요.
 
