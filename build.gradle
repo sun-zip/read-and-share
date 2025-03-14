@@ -59,6 +59,7 @@ dependencies {
 
 
 
+
 	implementation 'org.springframework.retry:spring-retry'
 	implementation 'org.springframework:spring-aspects'
 	testFixturesImplementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
