@@ -3,23 +3,31 @@ spring:
     active: local
 
   datasource:
-    url: jdbc:h2:mem:test
-    username: sa
-    password:
+    url: ${DB_URL:jdbc:h2:mem:test}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
     driver-class-name: org.h2.Driver
+
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:never}
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${JPA_DDL_AUTO:create}
     properties:
       hibernate:
         show_sql: true
         format_sql: true
+    defer-datasource-initialization: ${JPA_DDI:false}
 
   data:
     redis:
       host: ${DATA_REDIS_HOST:localhost}
       port: 6379
+
+  config:
+    import: optional:file:.env[.properties]
 
 jwt:
   access:
@@ -31,8 +39,8 @@ jwt:
 
 naver:
   book:
-    id: ${NAVER_BOOK_ID:none}
-    secret: ${NAVER_BOOK_SECRET:none}
+    id: ${NAVER_BOOK_ID:your_id}
+    secret: ${NAVER_BOOK_SECRET:your_key}
 
 logging:
   level:
@@ -42,3 +50,11 @@ logging:
 firebase:
   service:
     key: /firebase/readnshare-firebase-adminsdk.json
+
+
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
