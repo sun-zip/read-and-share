@@ -15,6 +15,11 @@ public class JwtAuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String requestURI = request.getRequestURI();
+//        if(requestURI.equals("/swagger-ui/") || requestURI.equals("/v3/api-docs/") || requestURI.equals("/swagger-resources/")){
+//            return true;
+//        }
+
         String accessToken = jwtUtil.extractAccessToken(request);
 
         if (accessToken != null) {
