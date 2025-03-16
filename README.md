@@ -13,7 +13,7 @@
     <td align="center"><img width="120" height="120" src=".github/readme/parkseonggeun.png"></td>
     <td align="center"><img width="120" height="120" src=".github/readme/kimduhi.jpeg"></td>
     <td align="center"><img width="120" height="120" src=".github/readme/jeonjunyoung.jpeg"></td>
-    <td align="center"><img width="120" height="120" src=".github/readme/kimminjun.jpeg"></td>
+    <td align="center"><img width="120" height="120" src=".github/readme/kimminjoun.jpeg"></td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/p-seonggeun">박성근</a></td>
