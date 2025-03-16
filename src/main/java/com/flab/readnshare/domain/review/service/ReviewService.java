@@ -2,6 +2,7 @@ package com.flab.readnshare.domain.review.service;
 
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.review.domain.Review;
+import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.UpdateReviewRequestDto;
 import com.flab.readnshare.domain.review.repository.ReviewRepository;
 import com.flab.readnshare.global.common.exception.MemberException;
@@ -68,5 +69,69 @@ public class ReviewService {
 
     public List<Review> findByIdIn(List<Long> reviewIds) {
         return reviewRepository.findByIdIn(reviewIds);
+    }
+
+
+    /**************************
+     추가 기능 < 2025.3.16>
+
+     책 제목으로 리뷰 검색
+     책 작가로 리뷰 검색
+     책 출판사로 리뷰 검색
+     리뷰 작성자 이름으로 리뷰 검색
+     + 키워드 검색
+
+    **************************/
+
+
+    @Transactional(readOnly = true)
+    public List<ReviewSearchResponseDto> searchByBookTitle(String title) {
+        return reviewRepository.findByBook_TitleContaining(title)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewSearchResponseDto> searchByBookAuthor(String author) {
+        return reviewRepository.findByBook_AuthorContaining(author)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewSearchResponseDto> searchByBookPublisher(String publisher) {
+        return reviewRepository.findByBook_PublisherContaining(publisher)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewSearchResponseDto> searchByMemberName(String memberName) {
+        return reviewRepository.findByMember_NameContaining(memberName)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReviewSearchResponseDto> searchByKeyword(String keyword) {
+        return reviewRepository.searchByKeyword(keyword)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    private ReviewSearchResponseDto convertToDto(Review review){
+        return new ReviewSearchResponseDto(
+                review.getId(),
+                review.getContent(),
+                review.getBook().getTitle(),
+                review.getBook().getAuthor(),
+                review.getBook().getPublisher(),
+                review.getMember().getNickName()
+        );
     }
 }
