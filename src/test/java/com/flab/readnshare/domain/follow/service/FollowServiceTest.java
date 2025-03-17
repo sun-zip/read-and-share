@@ -69,4 +69,29 @@ class FollowServiceTest {
                 );
     }
 
+    @DisplayName("특정 사용자의 팔로잉 목록을 조회한다.")
+    @Test
+    void getFollowings() throws Exception {
+        // Given
+        Member fromMember = FollowTestFixture.getMemberEntity();
+        Member toMember1 = FollowTestFixture.getMemberEntity();
+        Member toMember2 = FollowTestFixture.getMemberEntity();
+        Follow follow1 = FollowTestFixture.getFollowEntity(fromMember, toMember1);
+        Follow follow2 = FollowTestFixture.getFollowEntity(fromMember, toMember2);
+
+        given(followRepository.findByFromMember(eq(fromMember)))
+                .willReturn(List.of(follow1, follow2));
+
+        // When
+        List<Follow> followers = followService.getFollowings(fromMember);
+
+        // Then
+        Assertions.assertThat(followers).hasSize(2)
+                .extracting("toMember")
+                .containsExactlyInAnyOrder(
+                        toMember1,
+                        toMember2
+                );
+    }
+
 }

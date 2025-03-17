@@ -120,4 +120,32 @@ class FollowFacadeTest {
                 );
     }
 
+    @DisplayName("특정 유저의 팔로잉 목록을 조회한다.")
+    @Test
+    void getFollowingsOf() throws Exception {
+        // Given
+        Member fromMember = FollowTestFixture.getMemberEntity();
+        Member toMember1 = FollowTestFixture.getMemberEntity();
+        Member toMember2 = FollowTestFixture.getMemberEntity();
+        Follow follow1 = FollowTestFixture.getFollowEntity(fromMember, toMember1);
+        Follow follow2 = FollowTestFixture.getFollowEntity(fromMember, toMember2);
+
+        String memberEmail = fromMember.getEmail();
+        given(memberService.findByEmail(eq(memberEmail)))
+                .willReturn(fromMember);
+        given(followService.getFollowings(eq(fromMember)))
+                .willReturn(List.of(follow1, follow2));
+
+        // When
+        List<MemberResponseDto> followings = followFacade.getFollowingsOf(memberEmail);
+
+        // Then
+        Assertions.assertThat(followings).hasSize(2)
+                .extracting("email")
+                .containsExactlyInAnyOrder(
+                        toMember1.getEmail(),
+                        toMember2.getEmail()
+                );
+    }
+
 }
