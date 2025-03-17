@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 로그인, 토큰 발급, 토큰 검증 등의 인증 관련 비즈니스 로직을 처리하는 서비스 클래스
+ */
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -20,9 +23,8 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
-    /**
-     * 로그인
-     */
+
+    // 이메일로 회원을 조회하고 비밀번호를 검증하여 로그인을 처리하는 메서드
     public Member signIn(SignInRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(MemberException.MemberNotFoundException::new);
 
@@ -32,16 +34,19 @@ public class AuthService {
         throw new AuthException.InvalidPasswordException();
     }
 
+    // memberId에 대한 access 토큰을 생성 후 HTTP 응답 헤더에 설정
     public void sendAccessToken(HttpServletResponse response, Long memberId) {
         String accessToken = jwtUtil.createAccessToken(memberId);
         jwtUtil.setAccessTokenHeader(response, accessToken);
     }
 
+    // memberId에 대한 refresh 토큰을 생성 후 HTTP 응답 쿠키에 설정
     public void sendRefreshToken(HttpServletResponse response, Long memberId) {
         String refreshToken = jwtUtil.createRefreshToken(memberId);
         jwtUtil.setRefreshTokenCookie(response, refreshToken);
     }
 
+    // refresh 토큰을 검증
     public void validateTokenFromRedis(String refreshToken) {
         if (refreshTokenRepository.findById(refreshToken).isEmpty()) {
             throw new AuthException.ExpiredTokenException();

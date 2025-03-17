@@ -25,6 +25,13 @@ public class AuthApiController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
 
+
+    /**
+     * 로그인 API
+     * @param dto
+     * @param response
+     * @return
+     */
     @PostMapping("/signIn")
     public ResponseEntity<MemberResponseDto> signIn(@RequestBody SignInRequestDto dto, HttpServletResponse response) {
         Member member = authService.signIn(dto);
@@ -35,14 +42,20 @@ public class AuthApiController {
                 .nickName(member.getNickName())
                 .build();
 
-        // access token 발급
+        // access token 발급, 헤더에 설정
         authService.sendAccessToken(response, member.getId());
-        // refresh token 발급
+        // refresh token 발급, 쿠키에 설정
         authService.sendRefreshToken(response, member.getId());
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    /**
+     * refresh token을 이용한 access token 재발급 API
+     * @param cookie
+     * @param response
+     * @return
+     */
     @PostMapping("/refresh")
     public ResponseEntity<Void> refresh(@CookieValue(value = "refreshToken") Cookie cookie, HttpServletResponse response) {
         String refreshToken = Optional.ofNullable(cookie)
@@ -53,6 +66,7 @@ public class AuthApiController {
                 .map(jwtUtil::extractMemberId)
                 .orElseThrow(AuthException.DeniedTokenException::new);
 
+        // refresh token 검증
         switch (jwtUtil.validateToken(refreshToken)) {
             case DENIED -> {
                 throw new AuthException.DeniedTokenException();
@@ -61,7 +75,9 @@ public class AuthApiController {
                 throw new AuthException.ExpiredTokenException();
             }
             case ACCESS -> {
+                // refresh token 검증 후 access token 재발급
                 authService.validateTokenFromRedis(refreshToken);
+                // access token 발급, 헤더에 설정
                 authService.sendAccessToken(response, Long.valueOf(memberId));
 
                 return new ResponseEntity<>(HttpStatus.OK);
