@@ -44,4 +44,8 @@ public class FollowService {
                 .map(follow -> follow.getFromMember().getId())
                 .toList();
     }
+
+    public List<Follow> getFollowers(Member member) {
+        return followRepository.findByToMember(member);
+    }
 }
