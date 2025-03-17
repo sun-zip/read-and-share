@@ -54,4 +54,22 @@ class FollowApiControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
     }
+
+    @DisplayName("특정 유저의 팔로잉 목록을 조회한다.")
+    @Test
+    void followingsOf() throws Exception {
+        // Given
+        List<MemberResponseDto> result = List.of();
+        BDDMockito.given(followFacade.getFollowingsOf(anyString()))
+                .willReturn(result);
+
+        // When
+        // Then
+        mockMvc
+                .perform(
+                        get("/api/follow/followings/{memberEmail}", "test")
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

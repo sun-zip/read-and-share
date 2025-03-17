@@ -46,6 +46,24 @@ class FollowRepositoryTest {
                 .containsExactlyInAnyOrder("test2", "test3");
     }
 
+    @DisplayName("특정 유저의 팔로잉 목록을 조회한다.")
+    @Test
+    void findByFromMember() throws Exception {
+        // Given
+        List<Member> members = createMembers();
+        memberRepository.saveAll(members);
+        List<Member> findMembers = memberRepository.findAll();
+        Member fromMember = createFollowings(findMembers);
+
+        // When
+        List<Follow> follows = followRepository.findByFromMember(fromMember);
+
+        // Then
+        assertThat(follows).hasSize(2)
+                .extracting("toMember.nickName")
+                .containsExactlyInAnyOrder("test2", "test3");
+    }
+
     private List<Member> createMembers() {
         Member member1 = createMember("test1");
         Member member2 = createMember("test2");
@@ -72,6 +90,18 @@ class FollowRepositoryTest {
             followRepository.save(follow);
         }
         return toMember;
+    }
+
+    private Member createFollowings(List<Member> findMembers) {
+        Member fromMember = findMembers.getFirst();
+        for (int i = 1; i < findMembers.size(); i++) {
+            Follow follow = Follow.builder()
+                    .fromMember(fromMember)
+                    .toMember(findMembers.get(i))
+                    .build();
+            followRepository.save(follow);
+        }
+        return fromMember;
     }
 
 }
