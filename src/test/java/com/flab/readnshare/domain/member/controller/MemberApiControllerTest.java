@@ -2,6 +2,7 @@ package com.flab.readnshare.domain.member.controller;
 
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
+import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
 import com.flab.readnshare.domain.member.service.MemberService;
 import com.flab.readnshare.global.common.advice.ApiExceptionAdvice;
 import com.flab.readnshare.global.common.exception.MemberException;
@@ -147,4 +148,81 @@ class MemberApiControllerTest {
         ;
     }
 
+    @Test
+    @DisplayName("회원수정에 성공한다.")
+    void update_success() throws Exception {
+        // given
+        UpdateRequestDto request = UpdateRequestDto.builder()
+                .password("test24680!")
+                .nickName("test")
+                .build();
+
+        given(memberService.update(any(Long.class), any(UpdateRequestDto.class)))
+                .willReturn(MemberResponseDto.builder()
+                        .id(1L)
+                        .email("test@naver.com")
+                        .nickName("test")
+                        .build().toEntity());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.put("/api/member/1") // PUT 메서드로 변경
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new Gson().toJson(request))
+        );
+
+        // then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("test@naver.com")) // 기존 이메일
+                .andExpect(jsonPath("$.nickName").value(request.getNickName())); // 변경된 닉네임
+
+    }
+
+    @Test
+    @DisplayName("회원수정에 실패한다.(비밀번호)")
+    void update_fail_password_format() throws Exception {
+        // given
+        UpdateRequestDto request = UpdateRequestDto.builder()
+                .password("123")
+                .nickName("test")
+                .build();
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.put("/api/member/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new Gson().toJson(request))
+        );
+
+        // then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("입력값을 확인하세요."))
+                .andExpect(jsonPath("$.errors[0].field").value("password"))
+                .andExpect(jsonPath("$.errors[0].message").value("비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요."))
+        ;
+    }
+
+    @Test
+    @DisplayName("회원수정에 실패한다.(닉네임 없음)")
+    void update_fail_nickName_format() throws Exception {
+        // given
+        UpdateRequestDto request = UpdateRequestDto.builder()
+                .password("test24680!")
+                .nickName("")
+                .build();
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.put("/api/member/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new Gson().toJson(request))
+        );
+
+        // then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("입력값을 확인하세요."))
+                .andExpect(jsonPath("$.errors[0].field").value("nickName"))
+                .andExpect(jsonPath("$.errors[0].message").value("닉네임을 입력해주세요."))
+        ;
+    }
 }
