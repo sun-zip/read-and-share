@@ -5,8 +5,10 @@ import com.flab.readnshare.domain.follow.domain.Follow;
 import com.flab.readnshare.domain.follow.event.FollowEvent;
 import com.flab.readnshare.domain.follow.service.FollowService;
 import com.flab.readnshare.domain.member.domain.Member;
+import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.service.MemberService;
 import com.flab.readnshare.global.common.exception.FollowException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class FollowFacadeTest {
@@ -87,4 +91,33 @@ class FollowFacadeTest {
         // then
         verify(followService, times(1)).delete(fromMember, toMember);
     }
+
+    @DisplayName("특정 유저의 팔로우 목록을 조회한다.")
+    @Test
+    void getFollowersOf() throws Exception {
+        // Given
+        Member toMember = FollowTestFixture.getMemberEntity();
+        Member fromMember1 = FollowTestFixture.getMemberEntity();
+        Member fromMember2 = FollowTestFixture.getMemberEntity();
+        Follow follow1 = FollowTestFixture.getFollowEntity(fromMember1, toMember);
+        Follow follow2 = FollowTestFixture.getFollowEntity(fromMember2, toMember);
+
+        String memberEmail = toMember.getEmail();
+        given(memberService.findByEmail(eq(memberEmail)))
+                .willReturn(toMember);
+        given(followService.getFollowers(eq(toMember)))
+                .willReturn(List.of(follow1, follow2));
+
+        // When
+        List<MemberResponseDto> followers = followFacade.getFollowersOf(memberEmail);
+
+        // Then
+        Assertions.assertThat(followers).hasSize(2)
+                .extracting("email")
+                .containsExactlyInAnyOrder(
+                        fromMember1.getEmail(),
+                        fromMember2.getEmail()
+                );
+    }
+
 }
