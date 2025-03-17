@@ -1,12 +1,3 @@
----
-name: pull-request-template
-about: 풀 리퀘스트 요청 시 사용하는 템플릿
-title: ''
-labels: ''
-assignees: ''
-
----
-
 ## #️⃣ 연관된 이슈
 
 > ex) #이슈번호, #이슈번호
