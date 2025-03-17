@@ -48,4 +48,8 @@ public class FollowService {
     public List<Follow> getFollowers(Member member) {
         return followRepository.findByToMember(member);
     }
+
+    public List<Follow> getFollowings(Member member) {
+        return followRepository.findByFromMember(member);
+    }
 }

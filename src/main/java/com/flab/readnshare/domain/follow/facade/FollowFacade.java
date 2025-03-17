@@ -58,4 +58,18 @@ public class FollowFacade {
                         .build())
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<MemberResponseDto> getFollowingsOf(String memberEmail) {
+        Member fromMember = memberService.findByEmail(memberEmail);
+        List<Follow> followings = followService.getFollowings(fromMember);
+        return followings.stream()
+                .map(following -> following.getToMember())
+                .map(member -> MemberResponseDto.builder()
+                        .id(member.getId())
+                        .email(member.getEmail())
+                        .nickName(member.getNickName())
+                        .build())
+                .toList();
+    }
 }
