@@ -38,4 +38,10 @@ public class FollowApiController {
         List<MemberResponseDto> followers = followFacade.getFollowersOf(memberEmail);
         return new ResponseEntity<>(followers, HttpStatus.OK);
     }
+
+    @GetMapping("/followings/{memberEmail}")
+    public ResponseEntity<List<MemberResponseDto>> followingsOf(@PathVariable String memberEmail) {
+        List<MemberResponseDto> followings = followFacade.getFollowingsOf(memberEmail);
+        return new ResponseEntity<>(followings, HttpStatus.OK);
+    }
 }
