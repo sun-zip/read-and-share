@@ -3,6 +3,7 @@ package com.flab.readnshare.domain.member.controller;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
+import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
 import com.flab.readnshare.domain.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberApiController {
     private final MemberService memberService;
 
+    // 회원가입
     @PostMapping("/signUp")
     public ResponseEntity<MemberResponseDto> signUp(@Valid @RequestBody SignUpRequestDto dto){
         Member newMember = memberService.signUp(dto);
@@ -30,6 +32,33 @@ public class MemberApiController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
+
+    // 회원수정
+    @PutMapping("/{memberId}")
+    public ResponseEntity<MemberResponseDto> update(@PathVariable Long memberId, @Valid @RequestBody UpdateRequestDto dto){
+        Member updatedMember = memberService.update(memberId, dto);
+
+        MemberResponseDto responseDto = MemberResponseDto.builder()
+                .id(updatedMember.getId())
+                .email(updatedMember.getEmail())
+                .nickName(updatedMember.getNickName())
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 회원조회
+    @GetMapping("/{memberId}")
+    public ResponseEntity<MemberResponseDto> findById(@PathVariable Long memberId){
+        Member member = memberService.findById(memberId);
+
+        MemberResponseDto responseDto = MemberResponseDto.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickName(member.getNickName())
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
 
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> delete(@PathVariable Long memberId) {
