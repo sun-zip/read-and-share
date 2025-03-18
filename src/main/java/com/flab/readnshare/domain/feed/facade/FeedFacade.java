@@ -77,4 +77,14 @@ public class FeedFacade {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public void deleteToFeed(List<Long> followerIds, Long reviewId) {
+        feedRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            for (Long followerId : followerIds) {
+                String userFeedKey = String.format(KEY, followerId);
+                feedRedisTemplate.opsForZSet().remove(userFeedKey, String.valueOf(reviewId));
+            }
+            return null;
+        });
+    }
 }

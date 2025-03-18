@@ -18,6 +18,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * BookService는 도서 검색, 상세 검색, 그리고 도서 등록 등 Book 도메인 관련 비즈니스 로직을 처리함
+ * 네이버 오픈 API를 활용하여 도서 정보를 검색
+ */
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -35,7 +39,11 @@ public class BookService {
     private final BookRepository bookRepository;
 
     /**
-     * 책 검색
+     * 도서 검색을 수행
+     *
+     * @param keyword 검색어
+     * @param start 검색 시작 인덱스(페이지네이션)
+     * @return SearchBookReponseDto 형태의 도서 검색 결과
      */
     public SearchBookReponseDto searchBook(String keyword, int start) {
         HttpEntity<String> httpEntity = getHttpEntitiy();
@@ -52,7 +60,10 @@ public class BookService {
     }
 
     /**
-     * 책 상세 검색
+     * 도서 상세 검색을 수행
+     *
+     * @param isbn 도서의 ISBN 번호
+     * @return SearchBookDetailReponseDto 형태의 도서 상세 검색 결과
      */
     public SearchBookDetailReponseDto searchBookDetail(String isbn) {
         HttpEntity<String> httpEntity = getHttpEntitiy();
@@ -67,6 +78,12 @@ public class BookService {
         return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookDetailReponseDto.class).getBody();
     }
 
+    /**
+     * 네이버 도서 API 호출에 필요한 HTTP 엔티티를 생성
+     * 헤더에 클라이언트 ID와 시크릿을 추가
+     *
+     * @return HttpEntity 객체
+     */
     private HttpEntity<String> getHttpEntitiy() {
         // 헤더 인증 정보 추가
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -76,7 +93,12 @@ public class BookService {
     }
 
     /**
-     * 책 등록
+     * 도서 등록
+     * 만약 동일한 ISBN의 도서가 이미 존재하면 기존 도서를 반환하고,
+     * 없으면 새로운 도서를 저장
+     *
+     * @param dto 도서 정보를 담은 BookDto
+     * @return 등록(또는 조회)된 Book 엔티티
      */
     public Book save(BookDto dto) {
         Book book = bookRepository.findByIsbn(dto.getIsbn())

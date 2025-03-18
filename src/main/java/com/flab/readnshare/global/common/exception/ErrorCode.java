@@ -13,13 +13,13 @@ public enum ErrorCode {
 
     // Member
     EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, "이미 존재하는 회원입니다."),
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "이메일 또는 패스워드가 일치하지 않습니다."),
 
     // Auth
     JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     JWT_DENIED(HttpStatus.UNAUTHORIZED, "조작되거나 지원되지 않는 토큰입니다."),
     JWT_NULL(HttpStatus.UNAUTHORIZED, "토큰이 없습니다."),
-    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "이메일 또는 패스워드가 일치하지 않습니다."),
 
     // Review
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 독서 기록 입니다."),
