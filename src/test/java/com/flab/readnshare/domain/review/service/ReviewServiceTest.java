@@ -27,6 +27,20 @@ class ReviewServiceTest {
     @InjectMocks
     private ReviewService reviewService;
 
+    @Test@DisplayName("리뷰 id로 조회 성공")
+    void find_review_success() {
+        // given
+        Review review = ReviewTestFixture.getReviewEntity();
+        when(reviewRepository.findById(any(Long.class))).thenReturn(Optional.of(review));
+
+        // when
+        Review result = reviewService.findById(1L);
+
+        // then
+        assertEquals(review, result);
+
+    }
+
     @Test
     @DisplayName("해당 리뷰 id가 없는 경우 예외가 발생한다")
     void find_review_fail_no_id() {
