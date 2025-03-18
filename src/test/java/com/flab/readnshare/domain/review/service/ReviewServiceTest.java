@@ -96,4 +96,24 @@ class ReviewServiceTest {
         verify(reviewRepository, times(1)).delete(existReview);
     }
 
+    @Test
+    @DisplayName("삭제 요청자가 리뷰 작성자와 불일치")
+    void delete_review_fail_mismatch_member() {
+        // given
+        Review existReview = ReviewTestFixture.getReviewEntity();
+        Member wrongMember = Member.builder()
+                            .id(99L)
+                            .nickName("wrongUser")
+                            .build();
+        when(reviewRepository.findById(any(Long.class))).thenReturn(Optional.of(existReview));
+
+        // when & then
+        assertThrows(ReviewException.ForbiddenMemberException.class
+                , () -> reviewService.delete(existReview.getId(), wrongMember));
+
+        // verify - delete가 호출되지 않았는지 확인
+        verify(reviewRepository, never()).delete(any());
+
+    }
+
 }
