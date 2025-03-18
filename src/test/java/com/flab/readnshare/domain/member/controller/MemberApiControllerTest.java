@@ -1,5 +1,6 @@
 package com.flab.readnshare.domain.member.controller;
 
+import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.service.MemberService;
@@ -147,4 +148,50 @@ class MemberApiControllerTest {
         ;
     }
 
+    @Test
+    @DisplayName("이메일로 회원 검색 성공")
+    void searchMember_Success() throws Exception {
+        // given
+        String email = "test@naver.com";
+        Member member = Member.builder()
+                .id(1L)
+                .email(email)
+                .nickName("testUser")
+                .build();
+
+        when(memberService.findByEmail(email)).thenReturn(member);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/member/search")
+                        .param("email", email)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(member.getId()))
+                .andExpect(jsonPath("$.email").value(member.getEmail()))
+                .andExpect(jsonPath("$.nickName").value(member.getNickName()));
+    }
+
+    @Test
+    @DisplayName("이메일로 회원 검색 실패 - 존재하지 않는 회원")
+    void searchMember_Fail_NotFound() throws Exception {
+        // given
+        String email = "notfound@naver.com";
+
+        when(memberService.findByEmail(email)).thenThrow(new MemberException.MemberNotFoundException());
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/member/search")
+                        .param("email", email)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+    }
 }
