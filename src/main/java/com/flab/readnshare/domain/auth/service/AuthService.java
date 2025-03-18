@@ -49,6 +49,13 @@ public class AuthService {
         jwtUtil.setRefreshTokenCookie(response, refreshToken);
     }
 
+    // refresh 토큰을 삭제하고 새로운 access, refresh 토큰을 발급
+    public void updateRefreshToken(HttpServletResponse response, Long memberId, String oldRefreshToken) {
+        refreshTokenRepository.deleteById(oldRefreshToken);
+        sendAccessToken(response, memberId);
+        sendRefreshToken(response, memberId);
+    }
+
     // refresh 토큰을 검증
     public void validateTokenFromRedis(String refreshToken) {
         if (refreshTokenRepository.findById(refreshToken).isEmpty()) {
