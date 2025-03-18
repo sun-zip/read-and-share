@@ -30,9 +30,9 @@ public class AuthService {
 
     // 이메일로 회원을 조회하고 비밀번호를 검증하여 로그인을 처리하는 메서드
     public Member signIn(SignInRequestDto dto) {
-        Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(MemberException.MemberNotFoundException::new);
+        Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(AuthException.InvalidEmailOrPasswordException::new);
         if(!passwordEncoder.matches(dto.getPassword(), member.getPassword())){
-            throw new AuthException.InvalidPasswordException();
+            throw new AuthException.InvalidEmailOrPasswordException();
         }
         return member;
     }
