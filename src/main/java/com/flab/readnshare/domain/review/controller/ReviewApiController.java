@@ -1,6 +1,7 @@
 package com.flab.readnshare.domain.review.controller;
 
 import com.flab.readnshare.domain.member.domain.Member;
+import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.SaveReviewRequestDto;
 import com.flab.readnshare.domain.review.dto.UpdateReviewRequestDto;
 import com.flab.readnshare.domain.review.facade.ReviewFacade;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -37,7 +40,44 @@ public class ReviewApiController {
 
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> delete(@PathVariable Long reviewId, @SignInMember Member signInMember) {
-        reviewService.delete(reviewId, signInMember);
+        reviewFacade.delete(reviewId, signInMember);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    /**************************
+     추가 기능 < 2025.3.16>
+
+     책 제목으로 리뷰 검색
+     책 작가로 리뷰 검색
+     책 출판사로 리뷰 검색
+     리뷰 작성자 이름으로 리뷰 검색
+     + 키워드 검색
+
+     **************************/
+
+
+    // 책 제목으로 검색
+    @GetMapping("/search/title")
+    public ResponseEntity<List<ReviewSearchResponseDto>> searchByTitle(@RequestParam String title) {
+        return new ResponseEntity<>(reviewService.searchByBookTitle(title), HttpStatus.OK);
+    }
+
+    // 저자명으로 검색
+    @GetMapping("/search/author")
+    public ResponseEntity<List<ReviewSearchResponseDto>> searchByAuthor(@RequestParam String author) {
+        return new ResponseEntity<>(reviewService.searchByBookAuthor(author), HttpStatus.OK);
+    }
+
+    // 출판사로 검색
+    @GetMapping("/search/publisher")
+    public ResponseEntity<List<ReviewSearchResponseDto>> searchByPublisher(@RequestParam String publisher) {
+        return new ResponseEntity<>(reviewService.searchByBookPublisher(publisher), HttpStatus.OK);
+    }
+
+    // 작성자 이름으로 검색
+    @GetMapping("/search/member")
+    public ResponseEntity<List<ReviewSearchResponseDto>> searchByMemberName(@RequestParam String memberName) {
+        return new ResponseEntity<>(reviewService.searchByMemberName(memberName), HttpStatus.OK);
+    }
+
 }

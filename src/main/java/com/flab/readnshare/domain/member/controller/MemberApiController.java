@@ -59,5 +59,15 @@ public class MemberApiController {
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> delete(@PathVariable Long memberId) {
+        // 회원이 없을 경우
+        if (memberService.findById(memberId) == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        memberService.delete(memberId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

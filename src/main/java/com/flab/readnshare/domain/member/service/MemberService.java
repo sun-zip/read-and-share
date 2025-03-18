@@ -51,4 +51,8 @@ public class MemberService {
         // update 이후 id로 조회한 값 리턴
         return findById(id);
     }
+
+    public void delete(Long memberId) {
+        memberRepository.deleteById(memberId);
+    }
 }

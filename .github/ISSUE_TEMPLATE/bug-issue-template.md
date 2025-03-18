@@ -3,7 +3,7 @@ name: bug-issue-template
 about: 버그 이슈 발행 시 사용하는 템플릿
 title: ''
 labels: "\U0001F41B bug"
-assignees: Duhikim, Isonade2, p-seonggeun, UncleSamsun
+assignees: ''
 
 ---
 
