@@ -59,6 +59,7 @@ public class MemberApiController {
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> delete(@PathVariable Long memberId) {
