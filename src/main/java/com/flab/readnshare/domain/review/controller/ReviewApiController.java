@@ -40,7 +40,7 @@ public class ReviewApiController {
 
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> delete(@PathVariable Long reviewId, @SignInMember Member signInMember) {
-        reviewService.delete(reviewId, signInMember);
+        reviewFacade.delete(reviewId, signInMember);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
