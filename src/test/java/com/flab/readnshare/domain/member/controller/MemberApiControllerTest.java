@@ -1,5 +1,6 @@
 package com.flab.readnshare.domain.member.controller;
 
+import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.service.MemberService;
@@ -20,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -145,6 +147,50 @@ class MemberApiControllerTest {
                 .andExpect(jsonPath("$.errors[0].field").value("password"))
                 .andExpect(jsonPath("$.errors[0].message").value("비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요."))
         ;
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 회원을 삭제하면 404를 반환한다.")
+    void delete_fail_member_not_found() throws Exception {
+        // given
+        Long memberId = 1L;
+
+        // memberService.findById()가 null을 반환하도록 설정
+        when(memberService.findById(memberId)).thenReturn(null);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions.andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("존재하는 회원을 삭제하면 200을 반환한다.")
+    void delete_success_member() throws Exception {
+        // given
+        Long memberId = 1L;
+
+        Member member = Member.builder()
+                .email("test@naver.com")
+                .password("password123!")
+                .nickName("testUser")
+                .build();
+
+        when(memberService.findById(memberId)).thenReturn(member);
+        doNothing().when(memberService).delete(memberId);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions.andExpect(status().isOk());
     }
 
 }
