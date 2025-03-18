@@ -43,8 +43,19 @@ public class Review extends BaseTimeEntity {
         this.book = book;
     }
 
+    // [2025.3.17 코멘트]
+    // 기존 코드에서 if 절의 조건인 this.member != member보다 equals를 오버라이딩하는게 맞지 않은가 싶음.
+    // PK만 동일하다면 객체가 달라도 동일인으로 볼 수 있지 않은가?
+
+//  <기존 코드>
+//    public void verifyMember(Member member) {
+//        if (this.member != member) {
+//            throw new ReviewException.ForbiddenMemberException();
+//        }
+//    }
+
     public void verifyMember(Member member) {
-        if (this.member != member) {
+        if (!this.member.equals(member)) {
             throw new ReviewException.ForbiddenMemberException();
         }
     }
