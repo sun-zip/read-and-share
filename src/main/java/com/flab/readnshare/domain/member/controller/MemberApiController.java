@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -34,4 +31,15 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<MemberResponseDto> searchMember(@Valid @RequestParam String email){
+        Member member = memberService.findByEmail(email);
+
+        MemberResponseDto responseDto = MemberResponseDto.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickName(member.getNickName())
+                .build();
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }
