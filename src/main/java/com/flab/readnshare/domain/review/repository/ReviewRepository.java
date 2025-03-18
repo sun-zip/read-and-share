@@ -27,7 +27,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByBook_PublisherContaining(String publisher);
 
     // 작성자 이름으로 검색
-    List<Review> findByMember_NameContaining(String memberName);
+    List<Review> findByMember_NickNameContaining(String memberName);
 
     // OR 조건을 활용해 통합 검색도 가능 (Optional)
     @Query("SELECT r FROM Review r WHERE " +

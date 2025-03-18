@@ -5,11 +5,9 @@ import com.flab.readnshare.domain.review.domain.Review;
 import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.UpdateReviewRequestDto;
 import com.flab.readnshare.domain.review.repository.ReviewRepository;
-import com.flab.readnshare.global.common.exception.MemberException;
 import com.flab.readnshare.global.common.exception.ReviewException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
@@ -110,7 +108,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewSearchResponseDto> searchByMemberName(String memberName) {
-        return reviewRepository.findByMember_NameContaining(memberName)
+        return reviewRepository.findByMember_NickNameContaining(memberName)
                 .stream()
                 .map(this::convertToDto)
                 .toList();
