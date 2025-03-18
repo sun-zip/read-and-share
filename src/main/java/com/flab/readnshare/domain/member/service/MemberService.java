@@ -34,4 +34,7 @@ public class MemberService {
                 .orElseThrow(MemberException.MemberNotFoundException::new);
     }
 
+    public void delete(Long memberId) {
+        memberRepository.deleteById(memberId);
+    }
 }
