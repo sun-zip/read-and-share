@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -127,6 +128,22 @@ class FeedFacadeTest {
             assertEquals(review.getContent(), dto.getContent());
             assertEquals(review.getBook().getTitle(), dto.getBookTitle());
         }
+    }
+
+    @DisplayName("특정 피드를 삭제한다.")
+    @Test
+    void deleteFeed() throws Exception {
+        // Given
+        List<Long> followerIds = FeedTestFixture.getFollowerTestIds();
+        Review review = ReviewTestFixture.getReviewEntity();
+        Long reviewId = review.getId();
+        when(redisTemplate.executePipelined(any(RedisCallback.class))).thenReturn(null);
+
+        // When
+        feedFacade.deleteToFeed(followerIds, reviewId);
+
+        // Then
+        verify(redisTemplate, times(1)).executePipelined(any(RedisCallback.class));
     }
 
     private Review createMockReview(Long id, String content, String nickName, String bookTitle) {
