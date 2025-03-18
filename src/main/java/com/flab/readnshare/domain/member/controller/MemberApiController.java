@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -34,4 +31,14 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> delete(@PathVariable Long memberId) {
+        // 회원이 없을 경우
+        if (memberService.findById(memberId) == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        memberService.delete(memberId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
