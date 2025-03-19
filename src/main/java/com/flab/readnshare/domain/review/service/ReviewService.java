@@ -43,7 +43,7 @@ public class ReviewService {
     )
     @Transactional
     public Long update(Long reviewId, Member signInMember, UpdateReviewRequestDto dto) {
-        Review review = reviewRepository.findByIdForUpdate(reviewId).orElseThrow();
+        Review review = reviewRepository.findByIdForUpdate(reviewId).orElseThrow(ReviewException.ReviewNotFoundException::new);
         review.verifyMember(signInMember);
 
         review.update(dto.getContent());
@@ -107,7 +107,7 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewSearchResponseDto> searchByMemberName(String memberName) {
+    public List<ReviewSearchResponseDto> searchByMemberNickName(String memberName) {
         return reviewRepository.findByMember_NickNameContaining(memberName)
                 .stream()
                 .map(this::convertToDto)

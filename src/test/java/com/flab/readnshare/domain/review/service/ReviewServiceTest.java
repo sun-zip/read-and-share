@@ -2,10 +2,9 @@ package com.flab.readnshare.domain.review.service;
 
 import com.flab.readnshare.ReviewTestFixture;
 import com.flab.readnshare.domain.book.domain.Book;
-import com.flab.readnshare.domain.book.repository.BookRepository;
 import com.flab.readnshare.domain.member.domain.Member;
-import com.flab.readnshare.domain.member.repository.MemberRepository;
 import com.flab.readnshare.domain.review.domain.Review;
+import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.UpdateReviewRequestDto;
 import com.flab.readnshare.domain.review.repository.ReviewRepository;
 import com.flab.readnshare.global.common.exception.ReviewException;
@@ -18,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,10 +37,6 @@ class ReviewServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
-    @Mock
-    private MemberRepository memberRepository;
-    @Mock
-    private BookRepository bookRepository;
 
     private Member member;
     private Book book;
@@ -160,46 +155,343 @@ class ReviewServiceTest {
             assertThrows(ReviewException.ForbiddenMemberException.class
                     , () -> reviewService.update(existReview.getId(), mock(Member.class), request));
         }
+
+        @Test
+        @DisplayName("해당 ID로 찾을 수 없음")
+        void fail_id_not_found() {
+            // given
+            UpdateReviewRequestDto request = ReviewTestFixture.getUpdateReviewRequestDto();
+            when(reviewRepository.findByIdForUpdate(any(Long.class))).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(ReviewException.ReviewNotFoundException.class
+                    , () -> reviewService.update(1L, member, request));
+        }
+    }
+
+    @Nested
+    @DisplayName("delete 테스트")
+    class deleteTest {
+        @Test
+        @DisplayName("독서 기록 내용을 삭제한다")
+        void success() {
+            // given
+            Review existReview = ReviewTestFixture.getReviewEntity();
+
+            when(reviewRepository.findById(any(Long.class))).thenReturn(Optional.of(existReview));
+
+            // when
+            reviewService.delete(existReview.getId(), existReview.getMember());
+
+            // then
+            verify(reviewRepository, times(1)).delete(existReview);
+        }
+
+        @Test
+        @DisplayName("삭제 요청자가 리뷰 작성자와 불일치")
+        void fail_mismatch_member() {
+            // given
+            Review existReview = ReviewTestFixture.getReviewEntity();
+            Member wrongMember = Member.builder()
+                    .id(99L)
+                    .nickName("wrongUser")
+                    .build();
+            when(reviewRepository.findById(any(Long.class))).thenReturn(Optional.of(existReview));
+
+            // when & then
+            assertThrows(ReviewException.ForbiddenMemberException.class
+                    , () -> reviewService.delete(existReview.getId(), wrongMember));
+
+            // verify - delete가 호출되지 않았는지 확인
+            verify(reviewRepository, never()).delete(any());
+
+        }
+
+        @Test
+        @DisplayName("해당 ID로 찾을 수 없음")
+        void fail_id_not_found() {
+            // given
+            when(reviewRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            // when & then
+            assertThrows(ReviewException.ReviewNotFoundException.class
+                    , () -> reviewService.delete(1L, member));
+
+            // verify
+            verify(reviewRepository, never()).delete(any());
+        }
     }
 
 
+    @Nested
+    @DisplayName("search by book title 테스트")
+    class searchByBookTitleTest {
+        @Test
+        @DisplayName("책 제목으로 리뷰 검색 성공")
+        void success() {
+            // given
+            String keyword = "some keyword";
+            Review review1 = Review.builder()
+                    .id(1L)
+                    .content("Good book about Java!")
+                    .member(member)
+                    .book(book)
+                    .build();
 
+            Review review2 = Review.builder()
+                    .id(2L)
+                    .content("Learn Java step by step")
+                    .member(member)
+                    .book(book)
+                    .build();
 
+            when(reviewRepository.findByBook_TitleContaining(keyword)).thenReturn(List.of(review1, review2));
 
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByBookTitle("some keyword");
 
-    @Test
-    @DisplayName("독서 기록 내용을 삭제한다")
-    void delete_review_success() {
-        // given
-        Review existReview = ReviewTestFixture.getReviewEntity();
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getReviewId()).isEqualTo(1L);
+            assertThat(result.get(0).getContent()).isEqualTo("Good book about Java!");
+            assertThat(result.get(1).getReviewId()).isEqualTo(2L);
+            assertThat(result.get(1).getContent()).isEqualTo("Learn Java step by step");
+            verify(reviewRepository, times(1)).findByBook_TitleContaining(keyword);
+        }
 
-        when(reviewRepository.findById(any(Long.class))).thenReturn(Optional.of(existReview));
+        @Test
+        @DisplayName("검색 결과가 없는 경우")
+        void emptyResult() {
+            // given
+            String keyword = "NonExistingKeyword";
+            when(reviewRepository.findByBook_TitleContaining(keyword)).thenReturn(List.of());
 
-        // when
-        reviewService.delete(existReview.getId(), existReview.getMember());
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByBookTitle(keyword);
 
-        // then
-        verify(reviewRepository, times(1)).delete(existReview);
+            // then
+            assertThat(result).isEmpty();
+            verify(reviewRepository, times(1)).findByBook_TitleContaining(keyword);
+        }
+
     }
 
-    @Test
-    @DisplayName("삭제 요청자가 리뷰 작성자와 불일치")
-    void delete_review_fail_mismatch_member() {
-        // given
-        Review existReview = ReviewTestFixture.getReviewEntity();
-        Member wrongMember = Member.builder()
-                .id(99L)
-                .nickName("wrongUser")
-                .build();
-        when(reviewRepository.findById(any(Long.class))).thenReturn(Optional.of(existReview));
+    @Nested
+    @DisplayName("search by book author 테스트")
+    class searchByBookAuthorTest {
+        @Test
+        @DisplayName("책 저자로 리뷰 검색 성공")
+        void success() {
+            // given
+            String keyword = "some keyword";
+            Review review1 = Review.builder()
+                    .id(1L)
+                    .content("Good book about Java!")
+                    .member(member)
+                    .book(book)
+                    .build();
 
-        // when & then
-        assertThrows(ReviewException.ForbiddenMemberException.class
-                , () -> reviewService.delete(existReview.getId(), wrongMember));
+            Review review2 = Review.builder()
+                    .id(2L)
+                    .content("Learn Java step by step")
+                    .member(member)
+                    .book(book)
+                    .build();
 
-        // verify - delete가 호출되지 않았는지 확인
-        verify(reviewRepository, never()).delete(any());
+            when(reviewRepository.findByBook_AuthorContaining(keyword)).thenReturn(List.of(review1, review2));
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByBookAuthor("some keyword");
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getReviewId()).isEqualTo(1L);
+            assertThat(result.get(0).getContent()).isEqualTo("Good book about Java!");
+            assertThat(result.get(1).getReviewId()).isEqualTo(2L);
+            assertThat(result.get(1).getContent()).isEqualTo("Learn Java step by step");
+            verify(reviewRepository, times(1)).findByBook_AuthorContaining(keyword);
+        }
+
+        @Test
+        @DisplayName("검색 결과가 없는 경우")
+        void emptyResult() {
+            // given
+            String keyword = "NonExistingKeyword";
+            when(reviewRepository.findByBook_AuthorContaining(keyword)).thenReturn(List.of());
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByBookAuthor(keyword);
+
+            // then
+            assertThat(result).isEmpty();
+            verify(reviewRepository, times(1)).findByBook_AuthorContaining(keyword);
+        }
 
     }
+
+
+    @Nested
+    @DisplayName("search by book publisher 테스트")
+    class searchByBookPublisherTest {
+        @Test
+        @DisplayName("책 출판사로 리뷰 검색 성공")
+        void success() {
+            // given
+            String keyword = "some keyword";
+            Review review1 = Review.builder()
+                    .id(1L)
+                    .content("Good book about Java!")
+                    .member(member)
+                    .book(book)
+                    .build();
+
+            Review review2 = Review.builder()
+                    .id(2L)
+                    .content("Learn Java step by step")
+                    .member(member)
+                    .book(book)
+                    .build();
+
+            when(reviewRepository.findByBook_PublisherContaining(keyword)).thenReturn(List.of(review1, review2));
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByBookPublisher("some keyword");
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getReviewId()).isEqualTo(1L);
+            assertThat(result.get(0).getContent()).isEqualTo("Good book about Java!");
+            assertThat(result.get(1).getReviewId()).isEqualTo(2L);
+            assertThat(result.get(1).getContent()).isEqualTo("Learn Java step by step");
+            verify(reviewRepository, times(1)).findByBook_PublisherContaining(keyword);
+        }
+
+        @Test
+        @DisplayName("검색 결과가 없는 경우")
+        void emptyResult() {
+            // given
+            String keyword = "NonExistingKeyword";
+            when(reviewRepository.findByBook_PublisherContaining(keyword)).thenReturn(List.of());
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByBookPublisher(keyword);
+
+            // then
+            assertThat(result).isEmpty();
+            verify(reviewRepository, times(1)).findByBook_PublisherContaining(keyword);
+        }
+
+    }
+
+    @Nested
+    @DisplayName("search by member nick name 테스트")
+    class searchByMemberNickNameTest {
+        @Test
+        @DisplayName("리뷰어 이름으로 리뷰 검색 성공")
+        void success() {
+            // given
+            String keyword = "some keyword";
+            Review review1 = Review.builder()
+                    .id(1L)
+                    .content("Good book about Java!")
+                    .member(member)
+                    .book(book)
+                    .build();
+
+            Review review2 = Review.builder()
+                    .id(2L)
+                    .content("Learn Java step by step")
+                    .member(member)
+                    .book(book)
+                    .build();
+
+            when(reviewRepository.findByMember_NickNameContaining(keyword)).thenReturn(List.of(review1, review2));
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByMemberNickName("some keyword");
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getReviewId()).isEqualTo(1L);
+            assertThat(result.get(0).getContent()).isEqualTo("Good book about Java!");
+            assertThat(result.get(1).getReviewId()).isEqualTo(2L);
+            assertThat(result.get(1).getContent()).isEqualTo("Learn Java step by step");
+            verify(reviewRepository, times(1)).findByMember_NickNameContaining(keyword);
+        }
+
+        @Test
+        @DisplayName("검색 결과가 없는 경우")
+        void emptyResult() {
+            // given
+            String keyword = "NonExistingKeyword";
+            when(reviewRepository.findByMember_NickNameContaining(keyword)).thenReturn(List.of());
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByMemberNickName(keyword);
+
+            // then
+            assertThat(result).isEmpty();
+            verify(reviewRepository, times(1)).findByMember_NickNameContaining(keyword);
+        }
+
+    }
+
+
+    @Nested
+    @DisplayName("리뷰 키워드 검색 테스트")
+    class searchByKeyWordTest {
+
+        @Test
+        @DisplayName("검색어가 포함된 리뷰 목록 조회 성공")
+        void success() {
+            // given
+            String keyword = "Java";
+            Review review1 = Review.builder()
+                    .id(1L)
+                    .content("Good book about Java!")
+                    .member(member)
+                    .book(book)
+                    .build();
+
+            Review review2 = Review.builder()
+                    .id(2L)
+                    .content("Learn Java step by step")
+                    .member(member)
+                    .book(book)
+                    .build();
+
+            when(reviewRepository.searchByKeyword(keyword)).thenReturn(List.of(review1, review2));
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByKeyword(keyword);
+
+            // then
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).getReviewId()).isEqualTo(1L);
+            assertThat(result.get(0).getContent()).isEqualTo("Good book about Java!");
+            assertThat(result.get(1).getReviewId()).isEqualTo(2L);
+            assertThat(result.get(1).getContent()).isEqualTo("Learn Java step by step");
+
+            verify(reviewRepository, times(1)).searchByKeyword(keyword);
+        }
+
+        @Test
+        @DisplayName("검색 결과가 없는 경우")
+        void emptyResult() {
+            // given
+            String keyword = "NonExistingKeyword";
+            when(reviewRepository.searchByKeyword(keyword)).thenReturn(List.of());
+
+            // when
+            List<ReviewSearchResponseDto> result = reviewService.searchByKeyword(keyword);
+
+            // then
+            assertThat(result).isEmpty();
+            verify(reviewRepository, times(1)).searchByKeyword(keyword);
+        }
+
+    }
+
+
 
 }
