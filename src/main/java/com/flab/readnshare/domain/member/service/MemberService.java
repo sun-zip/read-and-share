@@ -26,7 +26,7 @@ public class MemberService {
      * 회원가입
      */
     @Transactional
-    public Member signUp(SignUpRequestDto dto) {
+    public Member signUp(SignUpRequestDto dto, PasswordEncoder passwordEncoder) {
         validateDuplicateMember(dto.getEmail());
         return memberRepository.save(dto.toEntity(passwordEncoder));
     }

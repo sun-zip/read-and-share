@@ -24,7 +24,7 @@ public class MemberApiController {
     // 회원가입
     @PostMapping("/signUp")
     public ResponseEntity<MemberResponseDto> signUp(@Valid @RequestBody SignUpRequestDto dto){
-        Member newMember = memberService.signUp(dto);
+        Member newMember = memberService.signUp(dto, passwordEncoder);
 
         MemberResponseDto responseDto = MemberResponseDto.builder()
                 .id(newMember.getId())
