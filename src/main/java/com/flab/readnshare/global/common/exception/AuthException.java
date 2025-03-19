@@ -17,6 +17,12 @@ public class AuthException extends RuntimeException {
         }
     }
 
+    public static class InvalidEmailOrPasswordException extends AuthException {
+        public InvalidEmailOrPasswordException() {
+            super(ErrorCode.INVALID_EMAIL_OR_PASSWORD);
+        }
+    }
+
     public static class ExpiredTokenException extends AuthException {
         public ExpiredTokenException() {
             super(ErrorCode.JWT_EXPIRED);
