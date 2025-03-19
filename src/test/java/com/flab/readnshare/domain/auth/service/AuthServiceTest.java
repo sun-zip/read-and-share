@@ -65,7 +65,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("비밀번호 불일치 시 InvalidPasswordException이 발생한다")
+    @DisplayName("비밀번호 불일치 시 InvalidEmailOrPasswordException 발생한다")
     void signIn_fail_password() {
         // given
         SignInRequestDto request = AuthTestFixture.getSignInRequestDto();
@@ -78,7 +78,7 @@ class AuthServiceTest {
         when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.ofNullable(expectedMember));
 
         // when & then
-        assertThrows(AuthException.InvalidPasswordException.class, () -> authService.signIn(request));
+        assertThrows(AuthException.InvalidEmailOrPasswordException.class, () -> authService.signIn(request));
     }
 
 
