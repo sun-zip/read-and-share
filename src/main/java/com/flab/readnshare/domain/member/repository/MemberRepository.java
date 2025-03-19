@@ -11,12 +11,6 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
 
-    // UPDATE 문을 사용하기 위해 @Modifying 어노테이션 사용
-    // jQuery 사용하여 email 제외 닉네임
-    @Modifying
-    @Query("UPDATE Member m SET m.nickName = :#{#member.nickName}, m.password = :#{#member.password} WHERE m.id = :id")
-    void update(@Param("id") Long id, @Param("member") Member member);
-
     @Modifying
     @Query("DELETE FROM Member m WHERE m.id = :memberId")
     void deleteById(Long memberId);
