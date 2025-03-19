@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,25 +21,28 @@ class FCMTokenRepositoryTest {
         fcmTokenRepository.deleteAll();
     }
 
-    @DisplayName("FCM 토큰을 저장한다.")
-    @Test
-    void saveFcmToken() throws Exception {
-        // Given
-        FCMToken fcmToken = FCMToken.builder()
-                .memberId(1L)
-                .fcmTokenValue("test")
-                .build();
-        fcmTokenRepository.save(fcmToken);
+    @Nested
+    @DisplayName("saveFCMToken 테스트")
+    class saveFCMToken {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // Given
+            FCMToken fcmToken = FCMToken.builder()
+                    .memberId(1L)
+                    .fcmTokenValue("test")
+                    .build();
+            fcmTokenRepository.save(fcmToken);
 
-        // When
-        Iterable<FCMToken> tokens = fcmTokenRepository.findAll();
+            // When
+            Iterable<FCMToken> tokens = fcmTokenRepository.findAll();
 
-        // Then
-        Assertions.assertThat(tokens).hasSize(1)
-                .extracting("memberId", "fcmTokenValue")
-                .containsExactly(
-                        Tuple.tuple(1L, "test")
-                );
+            // Then
+            Assertions.assertThat(tokens).hasSize(1)
+                    .extracting("memberId", "fcmTokenValue")
+                    .containsExactly(
+                            Tuple.tuple(1L, "test")
+                    );
+        }
     }
-
 }
