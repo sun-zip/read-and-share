@@ -74,5 +74,16 @@ public class ReviewTestFixture {
     }
 
 
+    public static Book getBookEntity() {
+        return Book.builder()
+                .id(1L)
+                .isbn("1234567890")
+                .image("testImage")
+                .author("Author")
+                .publisher("TestPress")
+                .link("testLink")
+                .build();
+    }
+
 }
 

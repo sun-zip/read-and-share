@@ -3,7 +3,7 @@ name: refactor-issue-template
 about: 리팩토링 이슈 발행 시 사용하는 템플릿
 title: ''
 labels: "♻️ refactor"
-assignees: Duhikim, Isonade2, p-seonggeun, UncleSamsun
+assignees: ''
 
 ---
 
