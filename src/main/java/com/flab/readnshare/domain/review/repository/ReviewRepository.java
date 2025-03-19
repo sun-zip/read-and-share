@@ -15,6 +15,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r WHERE r.id = :id")
     Optional<Review> findByIdForUpdate(Long id);
 
+    @Query("SELECT r FROM Review r JOIN FETCH r.book JOIN FETCH r.member WHERE r.id IN :reviewIds")
     List<Review> findByIdIn(List<Long> reviewIds);
 
     // 책 제목으로 검색
