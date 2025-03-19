@@ -47,6 +47,33 @@ public class ReviewTestFixture {
                 .build();
     }
 
+    public static Member createMember(String nickName) {
+        return Member.builder()
+                .id(null) // @GeneratedValue로 자동 생성됨
+                .nickName(nickName)
+                .build();
+    }
+
+    public static Book createBook(String title, String author, String publisher, String isbn) {
+        return Book.builder()
+                .id(null)
+                .title(title)
+                .author(author)
+                .publisher(publisher)
+                .isbn(isbn)
+                .build();
+    }
+
+    public static Review createReview(Member member, Book book, String content) {
+        return Review.builder()
+                .id(null)
+                .content(content)
+                .member(member)
+                .book(book)
+                .build();
+    }
+
+
     public static Book getBookEntity() {
         return Book.builder()
                 .id(1L)
