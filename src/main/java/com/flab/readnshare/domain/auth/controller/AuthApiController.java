@@ -77,8 +77,8 @@ public class AuthApiController {
             case ACCESS -> {
                 // refresh token 검증 후 access token 재발급
                 authService.validateTokenFromRedis(refreshToken);
-                // access token 발급, 헤더에 설정
-                authService.sendAccessToken(response, Long.valueOf(memberId));
+                // access token 재발급 및 리프레쉬 토큰 로테이션
+                authService.updateRefreshToken(response,Long.valueOf(memberId), refreshToken);
 
                 return new ResponseEntity<>(HttpStatus.OK);
             }
