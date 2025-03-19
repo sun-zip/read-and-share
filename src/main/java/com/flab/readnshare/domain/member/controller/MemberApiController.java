@@ -74,7 +74,6 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
-
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> delete(@PathVariable Long memberId) {
         // 회원이 없을 경우
