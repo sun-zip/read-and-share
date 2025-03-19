@@ -10,6 +10,7 @@ import com.flab.readnshare.global.common.exception.MemberException;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -49,154 +51,171 @@ class MemberApiControllerTest {
                 .build();
     }
 
-    @Test
-    @DisplayName("회원가입에 성공한다.")
-    void signup_success() throws Exception {
-        // given
-        SignUpRequestDto request = SignUpRequestDto.builder()
-                .email("test@naver.com")
-                .password("test24680!")
-                .nickName("test")
-                .build();
+    @Nested
+    @DisplayName("signUp 테스트")
+    class signup {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // given
+            SignUpRequestDto request = SignUpRequestDto.builder()
+                    .email("test@naver.com")
+                    .password("test24680!")
+                    .nickName("test")
+                    .build();
 
-        given(memberService.signUp(any(SignUpRequestDto.class)))
-                .willReturn(MemberResponseDto.builder()
-                        .id(1L)
-                        .email("test@naver.com")
-                        .nickName("test")
-                        .build().toEntity());
+            given(memberService.signUp(any(SignUpRequestDto.class), any()))
+                    .willReturn(MemberResponseDto.builder()
+                            .id(1L)
+                            .email("test@naver.com")
+                            .nickName("test")
+                            .build().toEntity());
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/member/signUp")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post("/api/member/signUp")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new Gson().toJson(request))
+            );
 
-        // then
-        resultActions.andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value(request.getEmail()))
-                .andExpect(jsonPath("$.nickName").value(request.getNickName()));
+            // then
+            resultActions.andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.email").value(request.getEmail()))
+                    .andExpect(jsonPath("$.nickName").value(request.getNickName()));
+        }
     }
 
-    @Test
-    @DisplayName("회원수정에 성공한다.")
-    void update_success() throws Exception {
-        // given
-        UpdateRequestDto request = UpdateRequestDto.builder()
-                .password("test24680!")
-                .nickName("test")
-                .build();
+    @Nested
+    @DisplayName("update 테스트")
+    class update {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // given
+            UpdateRequestDto request = UpdateRequestDto.builder()
+                    .password("test24680!")
+                    .nickName("test")
+                    .build();
 
-        given(memberService.update(any(Long.class), any(UpdateRequestDto.class)))
-                .willReturn(MemberResponseDto.builder()
-                        .id(1L)
-                        .email("test@naver.com")
-                        .nickName("test")
-                        .build().toEntity());
+            when(memberService.update(anyLong(), any(UpdateRequestDto.class), any()))
+                    .thenReturn(MemberResponseDto.builder()
+                            .id(1L)
+                            .email("test@naver.com")
+                            .nickName("test")
+                            .build().toEntity());
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.put("/api/member/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
 
-        // then
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.email").value("test@naver.com"))
-                .andExpect(jsonPath("$.nickName").value("test"));
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.put("/api/member/1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new Gson().toJson(request))
+            );
+
+            // then
+            resultActions.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1L))
+                    .andExpect(jsonPath("$.email").value("test@naver.com"))
+                    .andExpect(jsonPath("$.nickName").value("test"));
+        }
     }
 
-    @Test
-    @DisplayName("이메일로 회원 검색 성공")
-    void searchMember_Success() throws Exception {
-        // given
-        String email = "test@naver.com";
-        Member member = Member.builder()
-                .id(1L)
-                .email(email)
-                .nickName("testUser")
-                .build();
+    @Nested
+    @DisplayName("searchMember 테스트")
+    class searchMember {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // given
+            String email = "test@naver.com";
+            Member member = Member.builder()
+                    .id(1L)
+                    .email(email)
+                    .nickName("testUser")
+                    .build();
 
-        when(memberService.findByEmail(email)).thenReturn(member);
+            when(memberService.findByEmail(email)).thenReturn(member);
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/member/search")
-                        .param("email", email)
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/api/member/search")
+                            .param("email", email)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-        // then
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.email").value(email))
-                .andExpect(jsonPath("$.nickName").value("testUser"));
+            // then
+            resultActions.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(1L))
+                    .andExpect(jsonPath("$.email").value(email))
+                    .andExpect(jsonPath("$.nickName").value("testUser"));
+        }
+
+        @Test
+        @DisplayName("실패 - 회원이 없는 경우")
+        void fail_memberNotFound() throws Exception {
+            // given
+            String email = "notfound@naver.com";
+
+            when(memberService.findByEmail(email)).thenThrow(new MemberException.MemberNotFoundException());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/api/member/search")
+                            .param("email", email)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions.andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+        }
     }
 
-    @Test
-    @DisplayName("이메일로 회원 검색 실패 - 존재하지 않는 회원")
-    void searchMember_Fail_NotFound() throws Exception {
-        // given
-        String email = "notfound@naver.com";
+    @Nested
+    @DisplayName("delete 테스트")
+    class delete {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // given
+            Long memberId = 1L;
 
-        when(memberService.findByEmail(email)).thenThrow(new MemberException.MemberNotFoundException());
+            Member member = Member.builder()
+                    .id(memberId)
+                    .email("test@naver.com")
+                    .password("password123!")
+                    .nickName("testUser")
+                    .build();
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/member/search")
-                        .param("email", email)
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            when(memberService.findById(memberId)).thenReturn(member);
+            doNothing().when(memberService).delete(memberId);
 
-        // then
-        resultActions.andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
-    }
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-    @Test
-    @DisplayName("존재하지 않는 회원을 삭제하면 404를 반환한다.")
-    void delete_fail_member_not_found() throws Exception {
-        // given
-        Long memberId = 1L;
+            // then
+            resultActions.andExpect(status().isOk());
+        }
 
-        when(memberService.findById(memberId)).thenReturn(null);
+        @Test
+        @DisplayName("실패 - 회원이 없는 경우")
+        void fail_memberNotFound() throws Exception {
+            // given
+            Long memberId = 1L;
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
+            when(memberService.findById(memberId)).thenReturn(null);
 
-        // then
-        resultActions.andExpect(status().isNotFound());
-    }
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
 
-    @Test
-    @DisplayName("존재하는 회원을 삭제하면 200을 반환한다.")
-    void delete_success_member() throws Exception {
-        // given
-        Long memberId = 1L;
-
-        Member member = Member.builder()
-                .id(memberId)
-                .email("test@naver.com")
-                .password("password123!")
-                .nickName("testUser")
-                .build();
-
-        when(memberService.findById(memberId)).thenReturn(member);
-        doNothing().when(memberService).delete(memberId);
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
-                        .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        resultActions.andExpect(status().isOk());
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
     }
 }
