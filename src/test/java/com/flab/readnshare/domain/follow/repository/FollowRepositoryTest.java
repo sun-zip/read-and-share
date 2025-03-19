@@ -81,7 +81,7 @@ class FollowRepositoryTest {
     }
 
     private Member createFollows(List<Member> findMembers) {
-        Member toMember = findMembers.getFirst();
+        Member toMember = findMembers.get(0);
         for (int i = 1; i < findMembers.size(); i++) {
             Follow follow = Follow.builder()
                     .fromMember(findMembers.get(i))
@@ -93,7 +93,7 @@ class FollowRepositoryTest {
     }
 
     private Member createFollowings(List<Member> findMembers) {
-        Member fromMember = findMembers.getFirst();
+        Member fromMember = findMembers.get(0);
         for (int i = 1; i < findMembers.size(); i++) {
             Follow follow = Follow.builder()
                     .fromMember(fromMember)
