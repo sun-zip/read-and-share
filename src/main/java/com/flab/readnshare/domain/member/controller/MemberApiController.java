@@ -33,6 +33,19 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<MemberResponseDto> searchMember(@Valid @RequestParam String email){
+        Member member = memberService.findByEmail(email);
+
+        MemberResponseDto responseDto = MemberResponseDto.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickName(member.getNickName())
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
     // 회원수정
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> update(@PathVariable Long memberId, @Valid @RequestBody UpdateRequestDto dto){
@@ -49,7 +62,7 @@ public class MemberApiController {
 
     // 회원조회
     @GetMapping("/{memberId}")
-    public ResponseEntity<MemberResponseDto> findById(@PathVariable Long memberId){
+    public ResponseEntity<MemberResponseDto> findById(@PathVariable Long memberId) {
         Member member = memberService.findById(memberId);
 
         MemberResponseDto responseDto = MemberResponseDto.builder()

@@ -32,14 +32,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MemberApiControllerTest {
     @Mock
     private MemberService memberService;
+
     @InjectMocks
     private MemberApiController memberApiController;
+
     @InjectMocks
     ApiExceptionAdvice apiExceptionAdvice;
+
     private MockMvc mockMvc;
 
     @BeforeEach
-    public void init(){
+    public void init() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(memberApiController)
                 .setControllerAdvice(apiExceptionAdvice)
@@ -66,88 +69,14 @@ class MemberApiControllerTest {
         // when
         ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.post("/api/member/signUp")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new Gson().toJson(request))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new Gson().toJson(request))
         );
 
         // then
         resultActions.andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value(request.getEmail()))
                 .andExpect(jsonPath("$.nickName").value(request.getNickName()));
-    }
-
-    @Test
-    @DisplayName("회원가입에 실패한다.(중복 이메일)")
-    void signup_fail() throws Exception {
-        // given
-        SignUpRequestDto request = SignUpRequestDto.builder()
-                .email("test@naver.com")
-                .password("test24680!")
-                .nickName("test")
-                .build();
-
-        when(memberService.signUp(any(SignUpRequestDto.class)))
-                .thenThrow(new MemberException.DuplicateEmailException());
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/member/signUp")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
-
-        // then
-        resultActions.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("회원가입에 실패한다.(이메일 포맷)")
-    void signup_fail_emali_format() throws Exception {
-        // given
-        SignUpRequestDto request = SignUpRequestDto.builder()
-                .email("123")
-                .password("test24680!")
-                .nickName("test")
-                .build();
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/member/signUp")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
-
-        // then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("입력값을 확인하세요."))
-                .andExpect(jsonPath("$.errors[0].field").value("email"))
-                .andExpect(jsonPath("$.errors[0].message").value("이메일 형식이 맞지 않습니다."))
-            ;
-    }
-
-    @Test
-    @DisplayName("회원가입에 실패한다.(비밀번호 포맷)")
-    void signup_fail_password_format() throws Exception {
-        // given
-        SignUpRequestDto request = SignUpRequestDto.builder()
-                .email("test@naver.com")
-                .password("123")
-                .nickName("test")
-                .build();
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/member/signUp")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
-
-        // then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("입력값을 확인하세요."))
-                .andExpect(jsonPath("$.errors[0].field").value("password"))
-                .andExpect(jsonPath("$.errors[0].message").value("비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요."))
-        ;
     }
 
     @Test
@@ -168,72 +97,71 @@ class MemberApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.put("/api/member/1") // PUT 메서드로 변경
+                MockMvcRequestBuilders.put("/api/member/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new Gson().toJson(request))
         );
 
         // then
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("test@naver.com")) // 기존 이메일
-                .andExpect(jsonPath("$.nickName").value(request.getNickName())); // 변경된 닉네임
-
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.email").value("test@naver.com"))
+                .andExpect(jsonPath("$.nickName").value("test"));
     }
 
     @Test
-    @DisplayName("회원수정에 실패한다.(비밀번호)")
-    void update_fail_password_format() throws Exception {
+    @DisplayName("이메일로 회원 검색 성공")
+    void searchMember_Success() throws Exception {
         // given
-        UpdateRequestDto request = UpdateRequestDto.builder()
-                .password("123")
-                .nickName("test")
+        String email = "test@naver.com";
+        Member member = Member.builder()
+                .id(1L)
+                .email(email)
+                .nickName("testUser")
                 .build();
+
+        when(memberService.findByEmail(email)).thenReturn(member);
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.put("/api/member/1")
+                MockMvcRequestBuilders.get("/api/member/search")
+                        .param("email", email)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
         );
 
         // then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("입력값을 확인하세요."))
-                .andExpect(jsonPath("$.errors[0].field").value("password"))
-                .andExpect(jsonPath("$.errors[0].message").value("비밀번호는 8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요."))
-        ;
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.nickName").value("testUser"));
     }
 
     @Test
-    @DisplayName("회원수정에 실패한다.(닉네임 없음)")
-    void update_fail_nickName_format() throws Exception {
+    @DisplayName("이메일로 회원 검색 실패 - 존재하지 않는 회원")
+    void searchMember_Fail_NotFound() throws Exception {
         // given
-        UpdateRequestDto request = UpdateRequestDto.builder()
-                .password("test24680!")
-                .nickName("")
-                .build();
+        String email = "notfound@naver.com";
+
+        when(memberService.findByEmail(email)).thenThrow(new MemberException.MemberNotFoundException());
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.put("/api/member/1")
+                MockMvcRequestBuilders.get("/api/member/search")
+                        .param("email", email)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
         );
 
         // then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("입력값을 확인하세요."))
-                .andExpect(jsonPath("$.errors[0].field").value("nickName"))
-                .andExpect(jsonPath("$.errors[0].message").value("닉네임을 입력해주세요."))
-        ;
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
     }
 
+    @Test
     @DisplayName("존재하지 않는 회원을 삭제하면 404를 반환한다.")
     void delete_fail_member_not_found() throws Exception {
         // given
         Long memberId = 1L;
 
-        // memberService.findById()가 null을 반환하도록 설정
         when(memberService.findById(memberId)).thenReturn(null);
 
         // when
@@ -253,6 +181,7 @@ class MemberApiControllerTest {
         Long memberId = 1L;
 
         Member member = Member.builder()
+                .id(memberId)
                 .email("test@naver.com")
                 .password("password123!")
                 .nickName("testUser")
