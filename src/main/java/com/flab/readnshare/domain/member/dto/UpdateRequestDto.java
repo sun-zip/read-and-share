@@ -1,9 +1,11 @@
 package com.flab.readnshare.domain.member.dto;
 
+import com.flab.readnshare.domain.member.domain.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 public class UpdateRequestDto {
@@ -15,8 +17,17 @@ public class UpdateRequestDto {
     private String nickName;
 
     @Builder
-    public UpdateRequestDto(String password, String nickName){
+    public UpdateRequestDto(String password, String nickName) {
         this.password = password;
         this.nickName = nickName;
     }
+
+    // Member 엔티티로 변환하는 메서드 추가
+    public Member toEntity(PasswordEncoder passwordEncoder) {
+        return Member.builder()
+                .password(passwordEncoder.encode(password)) // 비밀번호 암호화
+                .nickName(nickName)
+                .build();
+    }
 }
+

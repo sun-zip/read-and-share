@@ -6,6 +6,8 @@ import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
 import com.flab.readnshare.domain.member.repository.MemberRepository;
 import com.flab.readnshare.global.common.exception.MemberException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +19,16 @@ import java.util.List;
 public class MemberService {
     private final MemberRepository memberRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     /**
      * 회원가입
      */
     @Transactional
     public Member signUp(SignUpRequestDto dto) {
         validateDuplicateMember(dto.getEmail());
-        return memberRepository.save(dto.toEntity());
+        return memberRepository.save(dto.toEntity(passwordEncoder));
     }
 
     private void validateDuplicateMember(String email) {
@@ -44,14 +49,24 @@ public class MemberService {
     }
 
     // 멤버 수정
-    public Member update(Long id, UpdateRequestDto dto) {
-        // 닉네임과 비밀번호 업데이트
-        memberRepository.update(id, dto.getNickName(), dto.getPassword());
+    @Transactional
+    public Member update(Long memberId, UpdateRequestDto requestDto, PasswordEncoder passwordEncoder) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
-        // update 이후 id로 조회한 값 리턴
-        return findById(id);
+        // toEntity()를 사용하여 업데이트할 Member 객체 생성
+        Member updatedMember = requestDto.toEntity(passwordEncoder);
+
+        // 기존 member의 ID와 Email은 유지한 채 업데이트
+        member.updateInfo(updatedMember.getNickName(), updatedMember.getPassword());
+
+        memberRepository.save(member); // 변경 감지로 자동 업데이트
+
+        return member;
     }
 
+
+    @Transactional
     public void delete(Long memberId) {
         memberRepository.deleteById(memberId);
     }
