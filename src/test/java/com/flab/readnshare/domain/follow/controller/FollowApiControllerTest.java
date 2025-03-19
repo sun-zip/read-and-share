@@ -1,13 +1,16 @@
 package com.flab.readnshare.domain.follow.controller;
 
 import com.flab.readnshare.FollowTestFixture;
+import com.flab.readnshare.domain.follow.domain.Follow;
 import com.flab.readnshare.domain.follow.facade.FollowFacade;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.global.common.advice.ApiExceptionAdvice;
 import com.flab.readnshare.global.common.exception.FollowException;
+import com.flab.readnshare.global.common.exception.MemberException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,16 +24,19 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @ExtendWith(MockitoExtension.class)
 class FollowApiControllerTest {
+
+    static final String FOLLOW_API_ENDPOINT = "/api/follow/{memberEmail}";
+    static final String UNFOLLOW_API_ENDPOINT = "/api/follow/{memberEmail}";
+    static final String FOLLOWERS_API_ENDPOINT = "/api/follow/followers/{memberEmail}";
+    static final String FOLLOWINGS_API_ENDPOINT = "/api/follow/followings/{memberEmail}";
 
     @Mock
     FollowFacade followFacade;
@@ -51,77 +57,228 @@ class FollowApiControllerTest {
                 .build();
     }
 
-    @DisplayName("자기 자신을 팔로우하면 FollowException.SelfFollowException 예외가 발생한다.")
-    @Test
-    void followFailSelfFollow() throws Exception {
-        // Given
-        Member member = FollowTestFixture.getMemberEntity();
-        String memberEmail = member.getEmail();
-        given(followFacade.follow(anyString(), any(Member.class)))
-                .willThrow(new FollowException.SelfFollowException());
+    @Nested
+    @DisplayName("follow 테스트")
+    class followTest {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // Given
+            Member fromMember = FollowTestFixture.getMemberEntity();
+            Member toMember = FollowTestFixture.getMemberEntity();
+            String memberEmail = toMember.getEmail();
+            Follow follow = FollowTestFixture.getFollowEntity(fromMember, toMember);
 
-        // When
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/follow/{memberEmail}", memberEmail)
-        );
+            given(followFacade.follow(anyString(), any(Member.class)))
+                    .willReturn(follow);
 
-        // Then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("자기 자신을 팔로우 할 수 없습니다."));
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    post(FOLLOW_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isCreated());
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 유저를 팔로우")
+        void fail_not_found_member() throws Exception {
+            // Given
+            Member fromMember = FollowTestFixture.getMemberEntity();
+            Member toMember = FollowTestFixture.getMemberEntity();
+            String memberEmail = toMember.getEmail();
+
+            willThrow(new MemberException.MemberNotFoundException())
+                    .given(followFacade).follow(anyString(), any(Member.class));
+
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    post(FOLLOW_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions.andExpect(status().isNotFound())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 자기 자신 팔로우")
+        void fail_self_follow() throws Exception {
+            // Given
+            Member member = FollowTestFixture.getMemberEntity();
+            String memberEmail = member.getEmail();
+            given(followFacade.follow(anyString(), any(Member.class)))
+                    .willThrow(new FollowException.SelfFollowException());
+
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    post(FOLLOW_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions.andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.message").value("자기 자신을 팔로우 할 수 없습니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 중복 팔로우")
+        void fail_duplicate_follow() throws Exception {
+            // Given
+            Member member = FollowTestFixture.getMemberEntity();
+            String memberEmail = member.getEmail();
+            given(followFacade.follow(anyString(), any(Member.class)))
+                    .willThrow(new FollowException.DuplicateFollowException());
+
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    post(FOLLOW_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions.andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.message").value("이미 해당 사용자를 팔로우하고 있습니다."));
+        }
     }
 
-    @DisplayName("이미 팔로우 한 사용자를 팔로우하면 FollowException.DuplicateFollowException 예외가 발생한다.")
-    @Test
-    void followFailDuplicateFollow() throws Exception {
-        // Given
-        Member member = FollowTestFixture.getMemberEntity();
-        String memberEmail = member.getEmail();
-        given(followFacade.follow(anyString(), any(Member.class)))
-                .willThrow(new FollowException.DuplicateFollowException());
+    @Nested
+    @DisplayName("unfollow 테스트")
+    class unfollowTest {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // Given
+            Member fromMember = FollowTestFixture.getMemberEntity();
+            Member toMember = FollowTestFixture.getMemberEntity();
+            String memberEmail = toMember.getEmail();
 
-        // When
-        ResultActions resultActions = mockMvc.perform(
-                post("/api/follow/{memberEmail}", memberEmail)
-        );
+            willDoNothing()
+                    .given(followFacade).unfollow(anyString(), any(Member.class));
 
-        // Then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("이미 해당 사용자를 팔로우하고 있습니다."));
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    delete(UNFOLLOW_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 유저를 언팔로우")
+        void fail_not_found_member() throws Exception {
+            // Given
+            Member fromMember = FollowTestFixture.getMemberEntity();
+            Member toMember = FollowTestFixture.getMemberEntity();
+            String memberEmail = toMember.getEmail();
+
+            willThrow(new MemberException.MemberNotFoundException())
+                    .given(followFacade).unfollow(anyString(), any(Member.class));
+
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    delete(UNFOLLOW_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions.andExpect(status().isNotFound())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+        }
     }
 
-    @DisplayName("특정 유저의 팔로워 목록을 조회한다.")
-    @Test
-    void followersOf() throws Exception {
-        // Given
-        List<MemberResponseDto> result = List.of();
-        given(followFacade.getFollowersOf(anyString()))
-                .willReturn(result);
+    @Nested
+    @DisplayName("followersOf 테스트")
+    class followersOfTest {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // Given
+            List<MemberResponseDto> result = List.of();
+            given(followFacade.getFollowersOf(anyString()))
+                    .willReturn(result);
 
-        // When
-        // Then
-        mockMvc
-                .perform(
-                        get("/api/follow/followers/{memberEmail}", "test")
-                )
-                .andDo(print())
-                .andExpect(status().isOk());
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    get(FOLLOWERS_API_ENDPOINT, "test")
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 유저의 팔로우 조회")
+        void fail_not_found_member() throws Exception {
+            // Given
+            Member toMember = FollowTestFixture.getMemberEntity();
+            String memberEmail = toMember.getEmail();
+
+            willThrow(new MemberException.MemberNotFoundException())
+                    .given(followFacade).getFollowersOf(anyString());
+
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    get(FOLLOWERS_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions.andExpect(status().isNotFound())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+        }
     }
 
-    @DisplayName("특정 유저의 팔로잉 목록을 조회한다.")
-    @Test
-    void followingsOf() throws Exception {
-        // Given
-        List<MemberResponseDto> result = List.of();
-        given(followFacade.getFollowingsOf(anyString()))
-                .willReturn(result);
+    @Nested
+    @DisplayName("followingsOf 테스트")
+    class followingsOfTest {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // Given
+            List<MemberResponseDto> result = List.of();
+            given(followFacade.getFollowingsOf(anyString()))
+                    .willReturn(result);
 
-        // When
-        // Then
-        mockMvc
-                .perform(
-                        get("/api/follow/followings/{memberEmail}", "test")
-                )
-                .andDo(print())
-                .andExpect(status().isOk());
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    get(FOLLOWINGS_API_ENDPOINT, "test")
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 유저의 팔로잉 조회")
+        void fail_not_found_member() throws Exception {
+            // Given
+            Member toMember = FollowTestFixture.getMemberEntity();
+            String memberEmail = toMember.getEmail();
+
+            willThrow(new MemberException.MemberNotFoundException())
+                    .given(followFacade).getFollowingsOf(anyString());
+
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    get(FOLLOWINGS_API_ENDPOINT, memberEmail)
+            );
+
+            // Then
+            resultActions.andExpect(status().isNotFound())
+                    .andDo(print())
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+        }
     }
 }

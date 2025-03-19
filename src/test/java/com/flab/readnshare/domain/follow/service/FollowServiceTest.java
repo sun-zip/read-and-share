@@ -7,6 +7,7 @@ import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.global.common.exception.FollowException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,69 +30,81 @@ class FollowServiceTest {
     @InjectMocks
     private FollowService followService;
 
-    @Test
-    @DisplayName("이미 팔로우하고 있는 사용자를 또 팔로우하면 DuplicateFollowException이 발생한다")
-    void follow_fail_duplicate_follow() {
-        // given
-        Member fromMember = FollowTestFixture.getMemberEntity();
-        Member toMember = FollowTestFixture.getMemberEntity();
+    @Nested
+    @DisplayName("follow 테스트")
+    class followTest {
 
-        Optional<Follow> follow = Optional.of(mock(Follow.class));
-        when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(follow);
+        @Test
+        @DisplayName("실패 - 중복 팔로우")
+        void fail_duplicate_follow() throws Exception {
+            // given
+            Member fromMember = FollowTestFixture.getMemberEntity();
+            Member toMember = FollowTestFixture.getMemberEntity();
 
-        // when & then
-        assertThrows(FollowException.DuplicateFollowException.class, () ->
-                followService.save(fromMember, toMember));
+            Optional<Follow> follow = Optional.of(mock(Follow.class));
+            when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(follow);
+
+            // when & then
+            assertThrows(FollowException.DuplicateFollowException.class, () ->
+                    followService.save(fromMember, toMember));
+        }
     }
 
-    @DisplayName("특정 사용자의 팔로우 목록을 조회한다.")
-    @Test
-    void getFollowers() throws Exception {
-        // Given
-        Member toMember = FollowTestFixture.getMemberEntity();
-        Member fromMember1 = FollowTestFixture.getMemberEntity();
-        Member fromMember2 = FollowTestFixture.getMemberEntity();
-        Follow follow1 = FollowTestFixture.getFollowEntity(fromMember1, toMember);
-        Follow follow2 = FollowTestFixture.getFollowEntity(fromMember2, toMember);
+    @Nested
+    @DisplayName("getFollowers 테스트")
+    class getFollowersTest {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // Given
+            Member toMember = FollowTestFixture.getMemberEntity();
+            Member fromMember1 = FollowTestFixture.getMemberEntity();
+            Member fromMember2 = FollowTestFixture.getMemberEntity();
+            Follow follow1 = FollowTestFixture.getFollowEntity(fromMember1, toMember);
+            Follow follow2 = FollowTestFixture.getFollowEntity(fromMember2, toMember);
 
-        given(followRepository.findByToMember(eq(toMember)))
-                .willReturn(List.of(follow1, follow2));
+            given(followRepository.findByToMember(eq(toMember)))
+                    .willReturn(List.of(follow1, follow2));
 
-        // When
-        List<Follow> followers = followService.getFollowers(toMember);
+            // When
+            List<Follow> followers = followService.getFollowers(toMember);
 
-        // Then
-        Assertions.assertThat(followers).hasSize(2)
-                .extracting("fromMember")
-                .containsExactlyInAnyOrder(
-                        fromMember1,
-                        fromMember2
-                );
+            // Then
+            Assertions.assertThat(followers).hasSize(2)
+                    .extracting("fromMember")
+                    .containsExactlyInAnyOrder(
+                            fromMember1,
+                            fromMember2
+                    );
+        }
     }
 
-    @DisplayName("특정 사용자의 팔로잉 목록을 조회한다.")
-    @Test
-    void getFollowings() throws Exception {
-        // Given
-        Member fromMember = FollowTestFixture.getMemberEntity();
-        Member toMember1 = FollowTestFixture.getMemberEntity();
-        Member toMember2 = FollowTestFixture.getMemberEntity();
-        Follow follow1 = FollowTestFixture.getFollowEntity(fromMember, toMember1);
-        Follow follow2 = FollowTestFixture.getFollowEntity(fromMember, toMember2);
+    @Nested
+    @DisplayName("getFollowings 테스트")
+    class getFollowingsTest {
+        @Test
+        @DisplayName("특정 사용자의 팔로잉 목록을 조회한다.")
+        void success() throws Exception {
+            // Given
+            Member fromMember = FollowTestFixture.getMemberEntity();
+            Member toMember1 = FollowTestFixture.getMemberEntity();
+            Member toMember2 = FollowTestFixture.getMemberEntity();
+            Follow follow1 = FollowTestFixture.getFollowEntity(fromMember, toMember1);
+            Follow follow2 = FollowTestFixture.getFollowEntity(fromMember, toMember2);
 
-        given(followRepository.findByFromMember(eq(fromMember)))
-                .willReturn(List.of(follow1, follow2));
+            given(followRepository.findByFromMember(eq(fromMember)))
+                    .willReturn(List.of(follow1, follow2));
 
-        // When
-        List<Follow> followers = followService.getFollowings(fromMember);
+            // When
+            List<Follow> followers = followService.getFollowings(fromMember);
 
-        // Then
-        Assertions.assertThat(followers).hasSize(2)
-                .extracting("toMember")
-                .containsExactlyInAnyOrder(
-                        toMember1,
-                        toMember2
-                );
+            // Then
+            Assertions.assertThat(followers).hasSize(2)
+                    .extracting("toMember")
+                    .containsExactlyInAnyOrder(
+                            toMember1,
+                            toMember2
+                    );
+        }
     }
-
 }
