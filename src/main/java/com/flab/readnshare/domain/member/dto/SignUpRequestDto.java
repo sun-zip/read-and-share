@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 public class SignUpRequestDto {
@@ -27,12 +28,13 @@ public class SignUpRequestDto {
         this.nickName = nickName;
     }
 
-    public Member toEntity(){
+    public Member toEntity(PasswordEncoder passwordEncoder){
         return Member.builder()
                 .email(email)
-                .password(password)
+                .password(passwordEncoder.encode(password)) // 주입받은 passwordEncoder 사용
                 .nickName(nickName)
                 .build();
     }
+
 
 }

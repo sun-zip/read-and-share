@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,11 +19,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/member")
 public class MemberApiController {
     private final MemberService memberService;
+    private final PasswordEncoder passwordEncoder; // PasswordEncoder 주입
 
     // 회원가입
     @PostMapping("/signUp")
     public ResponseEntity<MemberResponseDto> signUp(@Valid @RequestBody SignUpRequestDto dto){
-        Member newMember = memberService.signUp(dto);
+        Member newMember = memberService.signUp(dto, passwordEncoder);
 
         MemberResponseDto responseDto = MemberResponseDto.builder()
                 .id(newMember.getId())
@@ -33,7 +35,7 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-
+    // 이메일 기반 회원 검색
     @GetMapping("/search")
     public ResponseEntity<MemberResponseDto> searchMember(@Valid @RequestParam String email){
         Member member = memberService.findByEmail(email);
@@ -49,7 +51,7 @@ public class MemberApiController {
     // 회원수정
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> update(@PathVariable Long memberId, @Valid @RequestBody UpdateRequestDto dto){
-        Member updatedMember = memberService.update(memberId, dto);
+        Member updatedMember = memberService.update(memberId, dto, passwordEncoder);
 
         MemberResponseDto responseDto = MemberResponseDto.builder()
                 .id(updatedMember.getId())
@@ -74,6 +76,7 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    // 회원삭제
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> delete(@PathVariable Long memberId) {
         // 회원이 없을 경우
