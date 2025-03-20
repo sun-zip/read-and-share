@@ -45,8 +45,8 @@ public class BookService {
      * @param page    검색 시작 인덱스(페이지네이션)
      * @return SearchBookReponseDto 형태의 도서 검색 결과
      */
-    public SearchBookResponseDto searchBook(String keyword, int page, int itemsPerPage) {
-        int start = (page - 1) * itemsPerPage + 1;
+    public SearchBookResponseDto searchBook(String keyword, int page, int display) {
+        int start = (page - 1) * display + 1;
 
         URI targetUrl = UriComponentsBuilder
                 .fromUriString(SEARCH_BOOK_URL)
@@ -57,10 +57,10 @@ public class BookService {
                 .toUri();
 
         SearchBookResponseDto response = restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookResponseDto.class).getBody();
-        int totalItems = response.getTotal() != null ? response.getTotal() : 0;
-        int totalPages = (totalItems / itemsPerPage) + (totalItems % itemsPerPage == 0 ? 0 : 1);
 
-        response.setDisplay(itemsPerPage);
+        int totalItems = response.getTotal() != null ? response.getTotal() : 0;
+        int totalPages = (totalItems / display) + (totalItems % display == 0 ? 0 : 1);
+        response.setDisplay(display);
         response.setCurrentPage(page);
         response.setTotalPage(totalPages);
         return response;
