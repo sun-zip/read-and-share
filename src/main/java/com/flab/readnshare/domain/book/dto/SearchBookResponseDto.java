@@ -20,7 +20,7 @@ public class SearchBookResponseDto {
     List<Items> items = new ArrayList<>();
 
     @Getter
-    private class Items {
+    private static class Items {
         private String title;
         private String image;
         private String author;
