@@ -41,7 +41,7 @@ public class FeedFacade {
         });
     }
 
-    public List<FeedResponseDto> getFeed(Long memberId, Long lastReviewId, int limit) {
+    public List<FeedResponseDto> getFeeds(Long memberId, Long lastReviewId, int limit) {
         String userFeedKey = String.format(KEY, memberId);
 
         Set<Object> feedSet;

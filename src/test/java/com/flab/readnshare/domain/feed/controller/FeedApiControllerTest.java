@@ -28,6 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class FeedApiControllerTest {
 
+    static final String GET_FEEDS_API_ENDPOINT = "/api/v1/feeds";
+
     @Mock
     FeedFacade feedFacade;
 
@@ -44,8 +46,8 @@ class FeedApiControllerTest {
     }
 
     @Nested
-    @DisplayName("getFeed 테스트")
-    class getFeedTest {
+    @DisplayName("getFeeds 테스트")
+    class getFeedsTest {
         @Test
         @DisplayName("성공")
         void success() throws Exception {
@@ -62,11 +64,11 @@ class FeedApiControllerTest {
                     .bookTitle("test")
                     .build();
 
-            BDDMockito.given(feedFacade.getFeed(any(), anyLong(), anyInt()))
+            BDDMockito.given(feedFacade.getFeeds(any(), anyLong(), anyInt()))
                     .willReturn(List.of(response));
             // When
             ResultActions resultActions = mockMvc.perform(
-                    get("/api/feeds")
+                    get(GET_FEEDS_API_ENDPOINT)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
