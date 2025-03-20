@@ -40,7 +40,7 @@ public class ReviewApiController {
 
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> delete(@PathVariable Long reviewId, @SignInMember Member signInMember) {
-        reviewService.delete(reviewId, signInMember);
+        reviewFacade.delete(reviewId, signInMember);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -78,6 +78,7 @@ public class ReviewApiController {
     @GetMapping("/search/member")
     public ResponseEntity<List<ReviewSearchResponseDto>> searchByMemberName(@RequestParam String memberName) {
         return new ResponseEntity<>(reviewService.searchByMemberNickName(memberName), HttpStatus.OK);
+
     }
 
 }

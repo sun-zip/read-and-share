@@ -6,7 +6,8 @@ import com.flab.readnshare.domain.book.service.BookService;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.review.domain.Review;
 import com.flab.readnshare.domain.review.dto.SaveReviewRequestDto;
-import com.flab.readnshare.domain.review.event.ReviewEvent;
+import com.flab.readnshare.domain.review.event.ReviewCreateEvent;
+import com.flab.readnshare.domain.review.event.ReviewDeleteEvent;
 import com.flab.readnshare.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,8 +30,15 @@ public class ReviewFacade {
         Review review = dto.toEntity(signInMember, book);
         Long reviewId = reviewService.save(review);
 
-        eventPublisher.publishEvent(new ReviewEvent(signInMember, review));
+        eventPublisher.publishEvent(new ReviewCreateEvent(signInMember, review));
 
         return reviewId;
+    }
+
+    @Transactional
+    public void delete(Long reviewId, Member signInMember) {
+        reviewService.delete(reviewId, signInMember);
+
+        eventPublisher.publishEvent(new ReviewDeleteEvent(signInMember, reviewId));
     }
 }

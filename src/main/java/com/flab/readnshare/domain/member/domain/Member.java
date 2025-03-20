@@ -28,4 +28,10 @@ public class Member extends BaseTimeEntity {
         this.password = password;
         this.nickName = nickName;
     }
+
+    // 닉네임, 비밀번호 변경용 updateInfo 추가
+    public void updateInfo(String nickName, String password) {
+        this.nickName = nickName;
+        this.password = password;
+    }
 }

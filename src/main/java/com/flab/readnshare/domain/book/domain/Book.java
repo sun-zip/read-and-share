@@ -11,6 +11,11 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Book 엔티티는 도서 정보를 저장하는 JPA 엔티티
+ * 생성/수정 시간은 BaseTimeEntity를 상속받아 관리
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,25 +27,25 @@ public class Book extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String title;
+    private String title;   // 도서 제목
 
     @Column(nullable = false, unique = true)
-    private String isbn;
+    private String isbn;    // 도서의 고유 ISBN
 
-    private String image;
+    private String image;   // 도서 이미지 URL
 
-    private String author;
+    private String author;  // 도서 저자
 
-    private String publisher;
+    private String publisher;   // 도서 출판사
 
-    private String link;
+    private String link; // 도서 관련 링크(상세 정보 페이지)
 
     @Lob
     @Column(columnDefinition = "TEXT")
-    private String description;
+    private String description; // 도서 설명
 
     @OneToMany(mappedBy = "book")
-    private List<Review> reviews = new ArrayList<>();
+    private List<Review> reviews = new ArrayList<>();   // 해당 도서에 작성된 리뷰 목록
 
     @Builder
     public Book(Long id, String title, String isbn, String image, String author, String publisher, String link, String description){

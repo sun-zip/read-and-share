@@ -107,7 +107,9 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
+
     public List<ReviewSearchResponseDto> searchByMemberNickName(String memberName) {
+
         return reviewRepository.findByMember_NickNameContaining(memberName)
                 .stream()
                 .map(this::convertToDto)
