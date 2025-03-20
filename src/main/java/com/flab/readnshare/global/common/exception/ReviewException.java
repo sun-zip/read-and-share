@@ -23,4 +23,10 @@ public class ReviewException extends RuntimeException {
         }
     }
 
+    public static class InvalidScoreException extends RuntimeException{
+        public InvalidScoreException() {
+            super("별점은 0점이상 10점이하여야 합니다.");
+        }
+    }
+
 }
