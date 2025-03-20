@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/fcms")
 @Tag(name = "Notification", description = "알림")
-@SecurityRequirement(name = "JWT")
 public class FCMApiController {
     private final FCMService fcmService;
 
