@@ -1,7 +1,7 @@
 package com.flab.readnshare.domain.book.controller;
 
 import com.flab.readnshare.domain.book.dto.SearchBookDetailReponseDto;
-import com.flab.readnshare.domain.book.dto.SearchBookReponseDto;
+import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +27,16 @@ public class BookApiController {
      * 도서 검색 API
      *
      * @param keyword 검색어
-     * @param start 검색 시작 인덱스(페이지네이션)
+     * @param page 검색 시작 인덱스(페이지네이션)
      * @return 검색 결과(SearchBookReponseDto)를 포함하는 HTTP 응답 (200 OK)
      */
     @GetMapping("/search")
-    public ResponseEntity<SearchBookReponseDto> searchBook(@RequestParam String keyword, @RequestParam int start){
-        return new ResponseEntity<>(bookService.searchBook(keyword, start), HttpStatus.OK);
+    public ResponseEntity<SearchBookResponseDto> searchBook(
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int display){
+
+        return new ResponseEntity<>(bookService.searchBook(keyword, page, display), HttpStatus.OK);
     }
 
     /**
