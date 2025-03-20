@@ -46,8 +46,8 @@ class FeedApiControllerTest {
     }
 
     @Nested
-    @DisplayName("getFeed 테스트")
-    class getFeedTest {
+    @DisplayName("getFeeds 테스트")
+    class getFeedsTest {
         @Test
         @DisplayName("성공")
         void success() throws Exception {
@@ -64,7 +64,7 @@ class FeedApiControllerTest {
                     .bookTitle("test")
                     .build();
 
-            BDDMockito.given(feedFacade.getFeed(any(), anyLong(), anyInt()))
+            BDDMockito.given(feedFacade.getFeeds(any(), anyLong(), anyInt()))
                     .willReturn(List.of(response));
             // When
             ResultActions resultActions = mockMvc.perform(

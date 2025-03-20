@@ -22,7 +22,7 @@ public class FeedApiController {
     private final FeedFacade feedFacade;
 
     @GetMapping
-    public ResponseEntity<List<FeedResponseDto>> getFeed(@SignInMember Member member, @RequestBody FeedRequestDto dto) {
-        return new ResponseEntity<>(feedFacade.getFeed(member.getId(), dto.getLastReviewId(), dto.getLimit()), HttpStatus.OK);
+    public ResponseEntity<List<FeedResponseDto>> getFeeds(@SignInMember Member member, @RequestBody FeedRequestDto dto) {
+        return new ResponseEntity<>(feedFacade.getFeeds(member.getId(), dto.getLastReviewId(), dto.getLimit()), HttpStatus.OK);
     }
 }
