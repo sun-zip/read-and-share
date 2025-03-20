@@ -77,7 +77,8 @@ public class ReviewApiController {
     // 작성자 이름으로 검색
     @GetMapping("/search/member")
     public ResponseEntity<List<ReviewSearchResponseDto>> searchByMemberName(@RequestParam String memberName) {
-        return new ResponseEntity<>(reviewService.searchByMemberName(memberName), HttpStatus.OK);
+        return new ResponseEntity<>(reviewService.searchByMemberNickName(memberName), HttpStatus.OK);
+
     }
 
 }

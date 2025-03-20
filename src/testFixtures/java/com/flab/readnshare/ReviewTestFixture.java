@@ -1,5 +1,6 @@
 package com.flab.readnshare;
 
+import com.flab.readnshare.domain.book.domain.Book;
 import com.flab.readnshare.domain.book.dto.BookDto;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.review.domain.Review;
@@ -43,6 +44,44 @@ public class ReviewTestFixture {
                 .id(1L)
                 .email(faker.internet().emailAddress())
                 .password("test24680!")
+                .build();
+    }
+
+    public static Member createMember(String nickName) {
+        return Member.builder()
+                .id(null) // @GeneratedValue로 자동 생성됨
+                .nickName(nickName)
+                .build();
+    }
+
+    public static Book createBook(String title, String author, String publisher, String isbn) {
+        return Book.builder()
+                .id(null)
+                .title(title)
+                .author(author)
+                .publisher(publisher)
+                .isbn(isbn)
+                .build();
+    }
+
+    public static Review createReview(Member member, Book book, String content) {
+        return Review.builder()
+                .id(null)
+                .content(content)
+                .member(member)
+                .book(book)
+                .build();
+    }
+
+
+    public static Book getBookEntity() {
+        return Book.builder()
+                .id(1L)
+                .isbn("1234567890")
+                .image("testImage")
+                .author("Author")
+                .publisher("TestPress")
+                .link("testLink")
                 .build();
     }
 
