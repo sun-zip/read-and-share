@@ -3,7 +3,7 @@ package com.flab.readnshare.domain.book.service;
 import com.flab.readnshare.domain.book.domain.Book;
 import com.flab.readnshare.domain.book.dto.BookDto;
 import com.flab.readnshare.domain.book.dto.SearchBookDetailReponseDto;
-import com.flab.readnshare.domain.book.dto.SearchBookReponseDto;
+import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,11 +42,11 @@ public class BookService {
      * 도서 검색을 수행
      *
      * @param keyword 검색어
-     * @param start 검색 시작 인덱스(페이지네이션)
+     * @param page    검색 시작 인덱스(페이지네이션)
      * @return SearchBookReponseDto 형태의 도서 검색 결과
      */
-    public SearchBookReponseDto searchBook(String keyword, int start) {
-        HttpEntity<String> httpEntity = getHttpEntitiy();
+    public SearchBookResponseDto searchBook(String keyword, int page, int display) {
+        int start = (page - 1) * display + 1;
 
         URI targetUrl = UriComponentsBuilder
                 .fromUriString(SEARCH_BOOK_URL)
@@ -56,7 +56,14 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookReponseDto.class).getBody();
+        SearchBookResponseDto response = restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookResponseDto.class).getBody();
+
+        int totalItems = response.getTotal() != null ? response.getTotal() : 0;
+        int totalPages = (totalItems / display) + (totalItems % display == 0 ? 0 : 1);
+        response.setDisplay(display);
+        response.setCurrentPage(page);
+        response.setTotalPage(totalPages);
+        return response;
     }
 
     /**
@@ -66,7 +73,6 @@ public class BookService {
      * @return SearchBookDetailReponseDto 형태의 도서 상세 검색 결과
      */
     public SearchBookDetailReponseDto searchBookDetail(String isbn) {
-        HttpEntity<String> httpEntity = getHttpEntitiy();
 
         URI targetUrl = UriComponentsBuilder
                 .fromUriString(SEARCH_BOOK_DETAIL_URL)
@@ -75,7 +81,7 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookDetailReponseDto.class).getBody();
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookDetailReponseDto.class).getBody();
     }
 
     /**
