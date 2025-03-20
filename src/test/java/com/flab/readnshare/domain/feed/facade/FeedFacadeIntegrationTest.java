@@ -59,10 +59,7 @@ public class FeedFacadeIntegrationTest {
             Long timestamp = System.currentTimeMillis();
 
             // When
-            for (Long followerId : followerIds) {
-                String userFeedKey = String.format("user:%d:feed", followerId);
-                feedRedisTemplate.opsForZSet().add(userFeedKey, String.valueOf(reviewId), timestamp);
-            }
+            feedFacade.addToFeed(followerIds, review);
 
             // Then
             for (Long followerId : followerIds) {
