@@ -35,7 +35,6 @@ public class FCMApiController {
                             @ExampleObject(name = "JWT 토큰 없음", value = "{ \"code\": \"JWT_NULL\", \"message\": \"토큰이 없습니다.\" }")
                     }))
     })
-    @Parameter(name = "token", description = "FCM 토큰", example = "asdf872iuy87g68j7g8g7")
     public ResponseEntity<Void> saveFCMToken(@RequestBody SaveFCMTokenRequestDto dto, @Parameter(hidden = true) @SignInMember Member member) {
         fcmService.saveFCMToken(member, dto.getToken());
 
