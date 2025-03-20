@@ -7,9 +7,9 @@ import com.flab.readnshare.global.common.resolver.SignInMember;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,8 +29,11 @@ public class FCMApiController {
     @PostMapping
     @Operation(summary = "FCM 토큰 저장", description = "Firebase Cloud Messaging에서 발급해주는 토큰을 서버에 저장할 때 사용하는 API")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다.", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "401", description = "토큰이 없습니다.", content = @Content(mediaType = "application/json"))
+            @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "401", description = "토큰이 없습니다.", content = @Content(mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(name = "JWT 토큰 없음", value = "{ \"code\": \"JWT_NULL\", \"message\": \"토큰이 없습니다.\" }")
+                    }))
     })
     @Parameter(name = "token", description = "FCM 토큰", example = "asdf872iuy87g68j7g8g7")
     public ResponseEntity<Void> saveFCMToken(@RequestBody SaveFCMTokenRequestDto dto, @Parameter(hidden = true) @SignInMember Member member) {
