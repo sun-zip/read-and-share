@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class FeedApiControllerTest {
 
-    static final String GET_FEED = "/api/v1/feeds";
+    static final String GET_FEEDS_API_ENDPOINT = "/api/v1/feeds";
 
     @Mock
     FeedFacade feedFacade;
@@ -68,7 +68,7 @@ class FeedApiControllerTest {
                     .willReturn(List.of(response));
             // When
             ResultActions resultActions = mockMvc.perform(
-                    get(GET_FEED)
+                    get(GET_FEEDS_API_ENDPOINT)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
