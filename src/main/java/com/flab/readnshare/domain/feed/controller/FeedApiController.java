@@ -10,16 +10,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1/feeds")
 @RequiredArgsConstructor
 public class FeedApiController {
     private final FeedFacade feedFacade;
 
-    @GetMapping("/api/feeds")
+    @GetMapping
     public ResponseEntity<List<FeedResponseDto>> getFeed(@SignInMember Member member, @RequestBody FeedRequestDto dto) {
         return new ResponseEntity<>(feedFacade.getFeed(member.getId(), dto.getLastReviewId(), dto.getLimit()), HttpStatus.OK);
     }
