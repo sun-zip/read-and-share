@@ -16,17 +16,21 @@ public class UpdateRequestDto {
     @NotBlank(message = "닉네임을 입력해주세요.")
     private String nickName;
 
+    private String profileContent;
+
     @Builder
-    public UpdateRequestDto(String password, String nickName) {
+    public UpdateRequestDto(String password, String nickName, String profileContent) {
         this.password = password;
         this.nickName = nickName;
+        this.profileContent = profileContent;
     }
 
     // Member 엔티티로 변환하는 메서드 추가
     public Member toEntity(PasswordEncoder passwordEncoder) {
         return Member.builder()
-                .password(passwordEncoder.encode(password)) // 비밀번호 암호화
                 .nickName(nickName)
+                .password(passwordEncoder.encode(password)) // 비밀번호 암호화
+                .profileContent(profileContent)
                 .build();
     }
 }

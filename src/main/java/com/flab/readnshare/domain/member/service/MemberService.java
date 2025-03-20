@@ -58,7 +58,7 @@ public class MemberService {
         Member updatedMember = requestDto.toEntity(passwordEncoder);
 
         // 기존 member의 ID와 Email은 유지한 채 업데이트
-        member.updateInfo(updatedMember.getNickName(), updatedMember.getPassword());
+        member.updateInfo(updatedMember.getNickName(), updatedMember.getPassword(), updatedMember.getProfileContent());
 
         memberRepository.save(member); // 변경 감지로 자동 업데이트
 
