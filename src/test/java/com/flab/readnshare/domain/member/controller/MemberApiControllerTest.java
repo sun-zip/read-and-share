@@ -1,6 +1,8 @@
 package com.flab.readnshare.domain.member.controller;
 
+import com.flab.readnshare.domain.member.domain.Image;
 import com.flab.readnshare.domain.member.domain.Member;
+import com.flab.readnshare.domain.member.dto.MemberInfoResponseDto;
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
@@ -22,13 +24,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class MemberApiControllerTest {
@@ -168,6 +170,134 @@ class MemberApiControllerTest {
             // then
             resultActions.andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+        }
+    }
+
+    @Nested
+    @DisplayName("findById 테스트")
+    class findById {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // given
+            Long memberId = 1L;
+            String email = "test@naver.com";
+            String nickName = "testUser";
+            String profileContent = "신규회원입니다."; // profileContent 값 추가
+            Long profileImage = 1L;
+            String profileImagePath = "https://github.com/sun-zip/read-and-share/blob/develop/.github/readme/parkseonggeun.png";
+
+            Member member = Member.builder()
+                    .id(memberId)
+                    .email(email)
+                    .nickName(nickName)
+                    .profileContent(profileContent)  // profileContent 값 추가
+                    .profileImage(profileImage)
+                    .build();
+
+            Image image = Image.builder()
+                    .id(profileImage)
+                    .profileImagePath(profileImagePath)
+                    .build();
+
+            when(memberService.findById(memberId)).thenReturn(member);
+            when(memberService.findByImageId(profileImage)).thenReturn(image);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)  // URI 경로에 직접 memberId를 전달
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(memberId))  // memberId 확인
+                    .andExpect(jsonPath("$.email").value(email))  // 이메일 확인
+                    .andExpect(jsonPath("$.nickName").value(nickName))  // 닉네임 확인
+                    .andExpect(jsonPath("$.profileContent").value(profileContent))  // profileContent 확인
+                    .andExpect(jsonPath("$.profileImagePath").value(profileImagePath));  // profileImagePath 확인
+        }
+
+
+        @Test
+        @DisplayName("실패 - 회원이 없음")
+        void fail_memberNotFound() throws Exception {
+            // given
+            Long memberId = 999L;  // 존재하지 않는 memberId
+
+            when(memberService.findById(memberId)).thenThrow(new MemberException.MemberNotFoundException());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions.andExpect(status().isNotFound())  // 404 Not Found
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 회원입니다."));
+        }
+
+        @Test
+        @DisplayName("실패 - 프로필 이미지가 없음")
+        void fail_profileImageNotFound() throws Exception {
+            // given
+            Long memberId = 1L;
+            String email = "test@naver.com";
+            String nickName = "testUser";
+            String profileContent = "신규회원입니다.";
+            Long profileImage = 1L;
+
+            Member member = Member.builder()
+                    .id(memberId)
+                    .email(email)
+                    .nickName(nickName)
+                    .profileContent(profileContent)
+                    .profileImage(profileImage)
+                    .build();
+
+            when(memberService.findById(memberId)).thenReturn(member);
+            when(memberService.findByImageId(profileImage)).thenReturn(null); // 이미지가 없으면 null 반환
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions.andExpect(status().isNotFound()); // 404 Not Found
+        }
+
+        @Test
+        @DisplayName("실패 - 프로필 이미지가 없음")
+        void fail_invalidProfileImage() throws Exception {
+            // given
+            Long memberId = 1L;
+            String email = "test@naver.com";
+            String nickName = "testUser";
+            String profileContent = "신규회원입니다.";
+            Long profileImage = 999L;
+
+            Member member = Member.builder()
+                    .id(memberId)
+                    .email(email)
+                    .nickName(nickName)
+                    .profileContent(profileContent)
+                    .profileImage(profileImage)
+                    .build();
+
+            when(memberService.findById(memberId)).thenReturn(member);
+            when(memberService.findByImageId(profileImage)).thenReturn(null); // 이미지가 없으면 null 반환
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions.andExpect(status().isNotFound()); // 404 Not Found
         }
     }
 

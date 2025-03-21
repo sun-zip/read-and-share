@@ -21,11 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private ImageRepository imageRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ImageRepository imageRepository;
 
     /**
      * 회원가입
