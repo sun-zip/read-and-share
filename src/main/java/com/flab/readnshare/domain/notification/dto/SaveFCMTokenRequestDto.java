@@ -1,5 +1,6 @@
 package com.flab.readnshare.domain.notification.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class SaveFCMTokenRequestDto {
+
+    @NotBlank
     private String token;
 
     @Builder

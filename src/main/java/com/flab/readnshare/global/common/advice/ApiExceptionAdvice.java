@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -74,6 +75,12 @@ public class ApiExceptionAdvice {
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity handlerMethodValidationExceptionHandler(HandlerMethodValidationException ex) {
+        ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex) {
         ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

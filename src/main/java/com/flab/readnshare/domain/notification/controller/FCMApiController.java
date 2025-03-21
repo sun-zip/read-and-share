@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class FCMApiController {
                             @ExampleObject(name = "JWT 토큰 없음", value = "{ \"code\": \"JWT_NULL\", \"message\": \"토큰이 없습니다.\" }")
                     }))
     })
-    public ResponseEntity<Void> saveFCMToken(@RequestBody SaveFCMTokenRequestDto dto, @Parameter(hidden = true) @SignInMember Member member) {
+    public ResponseEntity<Void> saveFCMToken(@RequestBody @Valid SaveFCMTokenRequestDto dto, @Parameter(hidden = true) @SignInMember Member member) {
         fcmService.saveFCMToken(member, dto.getToken());
 
         return new ResponseEntity<>(HttpStatus.OK);
