@@ -1,4 +1,4 @@
-package com.flab.readnshare.domain.review.event;
+package com.flab.readnshare.domain.like.event;
 
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.review.domain.Review;

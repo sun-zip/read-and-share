@@ -5,7 +5,7 @@ import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.notification.domain.LikeNotificationContent;
 import com.flab.readnshare.domain.notification.service.NotificationSender;
 import com.flab.readnshare.domain.review.domain.Review;
-import com.flab.readnshare.domain.review.event.LikeEvent;
+import com.flab.readnshare.domain.like.event.LikeEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
