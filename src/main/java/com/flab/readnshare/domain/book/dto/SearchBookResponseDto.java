@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class SearchBookReponseDto {
+public class SearchBookResponseDto {
     public Integer total;
     List<Items> items = new ArrayList<>();
 

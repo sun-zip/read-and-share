@@ -2,8 +2,8 @@ package com.flab.readnshare.domain.book.service;
 
 import com.flab.readnshare.domain.book.domain.Book;
 import com.flab.readnshare.domain.book.dto.BookDto;
-import com.flab.readnshare.domain.book.dto.SearchBookDetailReponseDto;
-import com.flab.readnshare.domain.book.dto.SearchBookReponseDto;
+import com.flab.readnshare.domain.book.dto.SearchBookDetailResponseDto;
+import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,7 @@ public class BookService {
      * @param start 검색 시작 인덱스(페이지네이션)
      * @return SearchBookReponseDto 형태의 도서 검색 결과
      */
-    public SearchBookReponseDto searchBook(String keyword, int start) {
+    public SearchBookResponseDto searchBook(String keyword, int start) {
         HttpEntity<String> httpEntity = getHttpEntitiy();
 
         URI targetUrl = UriComponentsBuilder
@@ -56,7 +56,7 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookReponseDto.class).getBody();
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookResponseDto.class).getBody();
     }
 
     /**
@@ -65,7 +65,7 @@ public class BookService {
      * @param isbn 도서의 ISBN 번호
      * @return SearchBookDetailReponseDto 형태의 도서 상세 검색 결과
      */
-    public SearchBookDetailReponseDto searchBookDetail(String isbn) {
+    public SearchBookDetailResponseDto searchBookDetail(String isbn) {
         HttpEntity<String> httpEntity = getHttpEntitiy();
 
         URI targetUrl = UriComponentsBuilder
@@ -75,7 +75,7 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookDetailReponseDto.class).getBody();
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookDetailResponseDto.class).getBody();
     }
 
     /**
