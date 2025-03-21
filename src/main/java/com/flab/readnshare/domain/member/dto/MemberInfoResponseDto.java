@@ -10,22 +10,14 @@ public class MemberInfoResponseDto {
     private String email;
     private String nickName;
     private String profileContent;
+    private String profileImagePath;
 
     @Builder
-    public MemberInfoResponseDto(Long id, String email, String nickName, String profileContent) {
+    public MemberInfoResponseDto(Long id, String email, String nickName, String profileContent, String profileImagePath) {
         this.id = id;
         this.email = email;
         this.nickName = nickName;
         this.profileContent = profileContent;
+        this.profileImagePath = profileImagePath;
     }
-
-    public Member toEntity(){
-        return Member.builder()
-                .id(id)
-                .email(email)
-                .nickName(nickName)
-                .profileContent(profileContent)
-                .build();
-    }
-
 }

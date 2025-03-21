@@ -1,9 +1,12 @@
 package com.flab.readnshare.domain.member.service;
 
+import com.flab.readnshare.domain.member.domain.Image;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
+import com.flab.readnshare.domain.member.repository.ImageRepository;
 import com.flab.readnshare.domain.member.repository.MemberRepository;
+import com.flab.readnshare.global.common.exception.ImageException;
 import com.flab.readnshare.global.common.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,8 @@ public class MemberService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private ImageRepository imageRepository;
 
     /**
      * 회원가입
@@ -48,6 +53,16 @@ public class MemberService {
                 .orElseThrow(MemberException.MemberNotFoundException::new);
     }
 
+    public Image findByImageId(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("이미지 ID는 null이 될 수 없습니다.");
+        }
+
+        return imageRepository.findById(id)
+                .orElseThrow(ImageException.NotFoundImageException::new);
+    }
+
+
     // 멤버 수정
     @Transactional
     public Member update(Long memberId, UpdateRequestDto requestDto, PasswordEncoder passwordEncoder) {
@@ -58,7 +73,10 @@ public class MemberService {
         Member updatedMember = requestDto.toEntity(passwordEncoder);
 
         // 기존 member의 ID와 Email은 유지한 채 업데이트
-        member.updateInfo(updatedMember.getNickName(), updatedMember.getPassword(), updatedMember.getProfileContent());
+        member.updateInfo(updatedMember.getNickName(),
+                          updatedMember.getPassword(),
+                          updatedMember.getProfileContent(),
+                          updatedMember.getProfileImage());
 
         memberRepository.save(member); // 변경 감지로 자동 업데이트
 

@@ -1,5 +1,6 @@
 package com.flab.readnshare.domain.member.controller;
 
+import com.flab.readnshare.domain.member.domain.Image;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.MemberInfoResponseDto;
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
@@ -67,12 +68,14 @@ public class MemberApiController {
     @GetMapping("/{memberId}")
     public ResponseEntity<MemberInfoResponseDto> findById(@PathVariable Long memberId) {
         Member member = memberService.findById(memberId);
+        Image image = memberService.findByImageId(member.getProfileImage());
 
         MemberInfoResponseDto responseInfoDto = MemberInfoResponseDto.builder()
                 .id(member.getId())
                 .email(member.getEmail())
                 .nickName(member.getNickName())
                 .profileContent(member.getProfileContent())
+                .profileImagePath(image.getProfileImagePath())
                 .build();
 
         return new ResponseEntity<>(responseInfoDto, HttpStatus.OK);

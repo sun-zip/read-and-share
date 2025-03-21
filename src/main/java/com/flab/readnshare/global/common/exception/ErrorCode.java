@@ -15,6 +15,9 @@ public enum ErrorCode {
     EMAIL_DUPLICATION(HttpStatus.BAD_REQUEST, "이미 존재하는 회원입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
 
+    // Image
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지가 없습니다."),
+
     // Auth
     JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     JWT_DENIED(HttpStatus.UNAUTHORIZED, "조작되거나 지원되지 않는 토큰입니다."),
