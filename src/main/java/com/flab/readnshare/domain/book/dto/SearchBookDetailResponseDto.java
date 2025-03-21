@@ -1,6 +1,7 @@
 package com.flab.readnshare.domain.book.dto;
 
 import com.flab.readnshare.domain.book.domain.Book;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -11,7 +12,8 @@ public class SearchBookDetailResponseDto {
     List<Items> items = new ArrayList<>();
 
     @Getter
-    final static class Items {
+    @Builder
+    static public class Items {
         private String title;
         private String image;
         private String author;
