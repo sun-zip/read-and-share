@@ -1,6 +1,6 @@
 package com.flab.readnshare.domain.book.service;
 
-import com.flab.readnshare.domain.book.dto.SearchBookDetailReponseDto;
+import com.flab.readnshare.domain.book.dto.SearchBookDetailResponseDto;
 import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.repository.BookRepository;
 import org.junit.jupiter.api.Assertions;
@@ -80,13 +80,13 @@ public class BookServiceTest {
         void searchBookDetail_success() {
             // given
             String isbn = "9781234567890";
-            SearchBookDetailReponseDto mockResponse = new SearchBookDetailReponseDto();
-            ResponseEntity<SearchBookDetailReponseDto> responseEntity = ResponseEntity.ok(mockResponse);
+            SearchBookDetailResponseDto mockResponse = new SearchBookDetailResponseDto();
+            ResponseEntity<SearchBookDetailResponseDto> responseEntity = ResponseEntity.ok(mockResponse);
 
             // when
-            when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(SearchBookDetailReponseDto.class)))
+            when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(SearchBookDetailResponseDto.class)))
                     .thenReturn(responseEntity);
-            SearchBookDetailReponseDto result = bookService.searchBookDetail(isbn);
+            SearchBookDetailResponseDto result = bookService.searchBookDetail(isbn);
 
             //then
             Assertions.assertNotNull(result);

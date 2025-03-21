@@ -82,7 +82,7 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookDetailReponseDto.class).getBody();
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookDetailResponseDto.class).getBody();
     }
 
     /**
