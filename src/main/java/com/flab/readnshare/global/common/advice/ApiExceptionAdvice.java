@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @RestControllerAdvice
 public class ApiExceptionAdvice {
@@ -67,6 +68,12 @@ public class ApiExceptionAdvice {
     // MissingServletRequestParameterException은 필수 파라미터가 누락되었을 때 발생하는 예외
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity missingServletRequestParameterExceptionHandler(MissingServletRequestParameterException ex) {
+        ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity handlerMethodValidationExceptionHandler(HandlerMethodValidationException ex) {
         ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
