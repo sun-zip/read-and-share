@@ -1,8 +1,8 @@
-package com.flab.readnshare.domain.like.service;
+package com.flab.readnshare.domain.likeit.service;
 
-import com.flab.readnshare.domain.like.domain.Like;
-import com.flab.readnshare.domain.like.event.LikeEvent;
-import com.flab.readnshare.domain.like.repository.LikeRepository;
+import com.flab.readnshare.domain.likeit.domain.LikeIt;
+import com.flab.readnshare.domain.likeit.event.LikeItEvent;
+import com.flab.readnshare.domain.likeit.repository.LikeItRepository;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.review.domain.Review;
 import com.flab.readnshare.domain.review.repository.ReviewRepository;
@@ -17,9 +17,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class LikeService {
+public class LikeItService {
 
-	private final LikeRepository likeRepository;
+	private final LikeItRepository likeItRepository;
 	private final ReviewRepository reviewRepository;
 
 	private final ApplicationEventPublisher eventPublisher;
@@ -29,21 +29,21 @@ public class LikeService {
 		Review review = reviewRepository.findById(reviewId)
 				.orElseThrow(ReviewException.ReviewNotFoundException::new);
 
-		Optional<Like> existingLike = likeRepository.findByMemberAndReview(signInMember, review);
+		Optional<LikeIt> existingLike = likeItRepository.findByFromMemberAndToReview(signInMember, review);
 
 		if (existingLike.isPresent()) {
 			// 이미 좋아요 누름 -> 취소
-			likeRepository.delete(existingLike.get());
+			likeItRepository.delete(existingLike.get());
 		} else {
 			// 좋아요 누름
-			Like newLike = Like.builder()
+			LikeIt newLikeIt = LikeIt.builder()
 					.fromMember(signInMember)
 					.toReview(review)
 					.build();
-			likeRepository.save(newLike);
+			likeItRepository.save(newLikeIt);
 
 			// 이벤트 발행
-			eventPublisher.publishEvent(new LikeEvent(this, signInMember, review));
+			eventPublisher.publishEvent(new LikeItEvent(this, signInMember, review));
 
 		}
 	}

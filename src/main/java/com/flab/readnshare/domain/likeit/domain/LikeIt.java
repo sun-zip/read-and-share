@@ -1,4 +1,4 @@
-package com.flab.readnshare.domain.like.domain;
+package com.flab.readnshare.domain.likeit.domain;
 
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.review.domain.Review;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Like {
+public class LikeIt {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +26,7 @@ public class Like {
 	private Review toReview;
 
 	@Builder
-	public Like(Member fromMember, Review toReview){
+	public LikeIt(Member fromMember, Review toReview){
 		this.fromMember = fromMember;
 		this.toReview = toReview;
 	}
