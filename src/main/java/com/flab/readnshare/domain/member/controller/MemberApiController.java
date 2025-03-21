@@ -37,19 +37,6 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-    // 이메일 기반 회원 검색
-    @GetMapping("/search")
-    public ResponseEntity<MemberResponseDto> searchMember(@Valid @RequestParam String email){
-        Member member = memberService.findByEmail(email);
-
-        MemberResponseDto responseDto = MemberResponseDto.builder()
-                .id(member.getId())
-                .email(member.getEmail())
-                .nickName(member.getNickName())
-                .build();
-
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
-    }
     // 회원수정
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> update(@PathVariable Long memberId, @Valid @RequestBody UpdateRequestDto dto){
@@ -64,11 +51,29 @@ public class MemberApiController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    // 이메일 기반 회원 검색
+    @GetMapping("/search")
+    public ResponseEntity<MemberResponseDto> searchMember(@Valid @RequestParam String email){
+        Member member = memberService.findByEmail(email);
+
+        MemberResponseDto responseDto = MemberResponseDto.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickName(member.getNickName())
+                .build();
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
     // 회원조회
     @GetMapping("/{memberId}")
-    public ResponseEntity<MemberInfoResponseDto> findById(@PathVariable Long memberId) {
+    public ResponseEntity<?> findById(@PathVariable Long memberId) {
         Member member = memberService.findById(memberId);
         Image image = memberService.findByImageId(member.getProfileImage());
+
+        if (image == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         MemberInfoResponseDto responseInfoDto = MemberInfoResponseDto.builder()
                 .id(member.getId())
@@ -78,7 +83,7 @@ public class MemberApiController {
                 .profileImagePath(image.getProfileImagePath())
                 .build();
 
-        return new ResponseEntity<>(responseInfoDto, HttpStatus.OK);
+        return ResponseEntity.ok(responseInfoDto);
     }
 
     // 회원삭제
