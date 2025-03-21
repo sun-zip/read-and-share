@@ -95,7 +95,7 @@ public class FeedFacadeIntegrationTest {
             }
 
             // When
-            List<FeedResponseDto> result = feedFacade.getFeed(followerIds.get(0), null, limit);
+            List<FeedResponseDto> result = feedFacade.getFeeds(followerIds.get(0), null, limit);
 
             // Then
             assertThat(result).hasSize(1)
@@ -110,7 +110,7 @@ public class FeedFacadeIntegrationTest {
             List<Long> followerIds = FeedTestFixture.getFollowerTestIds();
 
             // When
-            List<FeedResponseDto> result = feedFacade.getFeed(followerIds.get(0), 999L, 10);
+            List<FeedResponseDto> result = feedFacade.getFeeds(followerIds.get(0), 999L, 10);
 
             // Then
             assertThat(result).hasSize(0).isEmpty();

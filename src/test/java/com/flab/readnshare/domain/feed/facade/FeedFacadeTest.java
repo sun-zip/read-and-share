@@ -80,7 +80,7 @@ class FeedFacadeTest {
             when(reviewService.findByIdIn(reviewIds)).thenReturn(reviews);
 
             // when
-            List<FeedResponseDto> feed = feedFacade.getFeed(memberId, null, limit);
+            List<FeedResponseDto> feed = feedFacade.getFeeds(memberId, null, limit);
 
             // then
             verify(zSetOperations).reverseRange(eq(userFeedKey), eq(0L), eq((long) limit - 1));
@@ -122,7 +122,7 @@ class FeedFacadeTest {
             when(reviewService.findByIdIn(reviewIds)).thenReturn(reviews);
 
             // when
-            List<FeedResponseDto> feed = feedFacade.getFeed(memberId, lastReviewId, limit);
+            List<FeedResponseDto> feed = feedFacade.getFeeds(memberId, lastReviewId, limit);
 
             // then
             verify(zSetOperations).reverseRangeByScore(eq(userFeedKey), eq(Double.MIN_VALUE), eq(lastReviewScore - 1), eq(0L), eq((long) limit));

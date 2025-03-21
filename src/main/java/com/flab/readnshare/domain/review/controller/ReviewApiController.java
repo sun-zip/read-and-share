@@ -1,6 +1,7 @@
 package com.flab.readnshare.domain.review.controller;
 
 import com.flab.readnshare.domain.member.domain.Member;
+import com.flab.readnshare.domain.review.domain.Review;
 import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.SaveReviewRequestDto;
 import com.flab.readnshare.domain.review.dto.UpdateReviewRequestDto;
@@ -59,26 +60,61 @@ public class ReviewApiController {
     // 책 제목으로 검색
     @GetMapping("/search/title")
     public ResponseEntity<List<ReviewSearchResponseDto>> searchByTitle(@RequestParam String title) {
+        if(title.isBlank()){
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
         return new ResponseEntity<>(reviewService.searchByBookTitle(title), HttpStatus.OK);
     }
 
     // 저자명으로 검색
     @GetMapping("/search/author")
     public ResponseEntity<List<ReviewSearchResponseDto>> searchByAuthor(@RequestParam String author) {
+        if(author.isBlank()){
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
         return new ResponseEntity<>(reviewService.searchByBookAuthor(author), HttpStatus.OK);
     }
 
     // 출판사로 검색
     @GetMapping("/search/publisher")
     public ResponseEntity<List<ReviewSearchResponseDto>> searchByPublisher(@RequestParam String publisher) {
+        if(publisher.isBlank()){
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
         return new ResponseEntity<>(reviewService.searchByBookPublisher(publisher), HttpStatus.OK);
     }
 
     // 작성자 이름으로 검색
     @GetMapping("/search/member")
     public ResponseEntity<List<ReviewSearchResponseDto>> searchByMemberName(@RequestParam String memberName) {
+        if(memberName.isBlank()){
+            throw new IllegalArgumentException("검색어를 입력하세요.");
+        }
         return new ResponseEntity<>(reviewService.searchByMemberNickName(memberName), HttpStatus.OK);
 
+    }
+
+    // 키워드 검색
+    @GetMapping("/search/keyword")
+    public ResponseEntity<List<ReviewSearchResponseDto>> searchByKeyword(@RequestParam String keyword) {
+        if(keyword.isBlank()){
+            throw new IllegalArgumentException("검색어를 입력해주세요.");
+        }
+        return new ResponseEntity<>(reviewService.searchByKeyword(keyword), HttpStatus.OK);
+    }
+
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<ReviewSearchResponseDto> findById(@PathVariable Long reviewId) {
+        Review review = reviewService.findById(reviewId);
+        ReviewSearchResponseDto dto = new ReviewSearchResponseDto(
+                review.getId(),
+                review.getContent(),
+                review.getBook().getTitle(),
+                review.getBook().getAuthor(),
+                review.getBook().getPublisher(),
+                review.getMember().getNickName()
+        );
+        return ResponseEntity.ok(dto);
     }
 
 }

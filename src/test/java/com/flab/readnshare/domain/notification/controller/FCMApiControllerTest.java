@@ -24,6 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class FCMApiControllerTest {
 
+    static final String SAVE_FCMTOKEN_API_ENDPOINT = "/api/v1/fcms";
+
     @Mock
     FCMService fcmService;
 
@@ -55,7 +57,7 @@ class FCMApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/fcm")
+                    MockMvcRequestBuilders.post(SAVE_FCMTOKEN_API_ENDPOINT)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );

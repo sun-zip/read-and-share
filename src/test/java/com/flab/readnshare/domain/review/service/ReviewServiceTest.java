@@ -144,6 +144,24 @@ class ReviewServiceTest {
         }
 
         @Test
+        @DisplayName("내용만 수정, 별점 유지")
+        void content_only() {
+            // given
+            UpdateReviewRequestDto request = new UpdateReviewRequestDto("Updated content", null);
+            Review existReview = ReviewTestFixture.getReviewEntity();
+            existReview.updateScore(7); // 초기 score: 7점으로 세팅
+
+            when(reviewRepository.findByIdForUpdate(any(Long.class))).thenReturn(Optional.of(existReview));
+
+            // when
+            reviewService.update(existReview.getId(), existReview.getMember(), request);
+
+            // then
+            assertEquals("Updated content", existReview.getContent());
+            assertEquals(7, existReview.getScore()); // score 그대로 유지 확인
+        }
+
+        @Test
         @DisplayName("독서 기록 작성자와 수정자가 다르면 예외가 발생한다")
         void fail_mismatch_member() {
             // given

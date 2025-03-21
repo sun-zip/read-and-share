@@ -33,10 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class FollowApiControllerTest {
 
-    static final String FOLLOW_API_ENDPOINT = "/api/follow/{memberEmail}";
-    static final String UNFOLLOW_API_ENDPOINT = "/api/follow/{memberEmail}";
-    static final String FOLLOWERS_API_ENDPOINT = "/api/follow/followers/{memberEmail}";
-    static final String FOLLOWINGS_API_ENDPOINT = "/api/follow/followings/{memberEmail}";
+    static final String FOLLOW_API_ENDPOINT = "/api/v1/follows/{toMemberEmail}";
+    static final String UNFOLLOW_API_ENDPOINT = "/api/v1/follows/{toMemberEmail}";
+    static final String FOLLOWERS_API_ENDPOINT = "/api/v1/follows/{memberEmail}/followers";
+    static final String FOLLOWINGS_API_ENDPOINT = "/api/v1/follows/{memberEmail}/followings";
 
     @Mock
     FollowFacade followFacade;

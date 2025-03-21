@@ -46,7 +46,8 @@ public class ReviewService {
         Review review = reviewRepository.findByIdForUpdate(reviewId).orElseThrow(ReviewException.ReviewNotFoundException::new);
         review.verifyMember(signInMember);
 
-        review.update(dto.getContent());
+        review.updateContent(dto.getContent());
+        if(dto.getScore() != null)review.updateScore(dto.getScore());
 
         return review.getId();
     }

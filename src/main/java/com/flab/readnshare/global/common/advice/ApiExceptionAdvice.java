@@ -2,11 +2,13 @@ package com.flab.readnshare.global.common.advice;
 
 import com.flab.readnshare.global.common.exception.*;
 import com.flab.readnshare.global.common.exception.RestTemplateResponseErrorHandler.RestCallException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -59,6 +61,20 @@ public class ApiExceptionAdvice {
     public ResponseEntity followExceptionHandler(FollowException ex) {
         ErrorResponse response = new ErrorResponse(ex.getErrorCode());
         return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
+    }
+
+    // ConstraintViolationException은 @Validated 어노테이션을 사용하여 검증할 때 발생하는 예외
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity constraintViolationExceptionHandler(ConstraintViolationException ex) {
+        ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // MissingServletRequestParameterException은 필수 파라미터가 누락되었을 때 발생하는 예외
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity missingServletRequestParameterExceptionHandler(MissingServletRequestParameterException ex) {
+        ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 }

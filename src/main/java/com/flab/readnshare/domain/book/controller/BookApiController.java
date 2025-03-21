@@ -3,10 +3,14 @@ package com.flab.readnshare.domain.book.controller;
 import com.flab.readnshare.domain.book.dto.SearchBookDetailResponseDto;
 import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.service.BookService;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/book")
+@Validated
 public class BookApiController {
     private final BookService bookService;
 
@@ -27,12 +32,16 @@ public class BookApiController {
      * 도서 검색 API
      *
      * @param keyword 검색어
-     * @param start 검색 시작 인덱스(페이지네이션)
+     * @param page 검색 시작 인덱스(페이지네이션)
      * @return 검색 결과(SearchBookReponseDto)를 포함하는 HTTP 응답 (200 OK)
      */
     @GetMapping("/search")
-    public ResponseEntity<SearchBookResponseDto> searchBook(@RequestParam String keyword, @RequestParam int start){
-        return new ResponseEntity<>(bookService.searchBook(keyword, start), HttpStatus.OK);
+    public ResponseEntity<SearchBookResponseDto> searchBook(
+            @RequestParam @NotBlank String keyword,
+            @RequestParam(required = false, defaultValue = "1") @Min(1) int page,
+            @RequestParam(required = false,  defaultValue = "10") @Min(1) int display){
+
+        return new ResponseEntity<>(bookService.searchBook(keyword, page, display), HttpStatus.OK);
     }
 
     /**

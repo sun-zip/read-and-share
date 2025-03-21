@@ -42,11 +42,11 @@ public class BookService {
      * 도서 검색을 수행
      *
      * @param keyword 검색어
-     * @param start 검색 시작 인덱스(페이지네이션)
+     * @param page    검색 시작 인덱스(페이지네이션)
      * @return SearchBookReponseDto 형태의 도서 검색 결과
      */
-    public SearchBookResponseDto searchBook(String keyword, int start) {
-        HttpEntity<String> httpEntity = getHttpEntitiy();
+    public SearchBookResponseDto searchBook(String keyword, int page, int display) {
+        int start = (page - 1) * display + 1;
 
         URI targetUrl = UriComponentsBuilder
                 .fromUriString(SEARCH_BOOK_URL)
@@ -56,7 +56,14 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookResponseDto.class).getBody();
+        SearchBookResponseDto response = restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookResponseDto.class).getBody();
+
+        int totalItems = response.getTotal() != null ? response.getTotal() : 0;
+        int totalPages = (totalItems / display) + (totalItems % display == 0 ? 0 : 1);
+        response.setDisplay(display);
+        response.setCurrentPage(page);
+        response.setTotalPage(totalPages);
+        return response;
     }
 
     /**
@@ -75,7 +82,7 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, httpEntity, SearchBookDetailResponseDto.class).getBody();
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookDetailReponseDto.class).getBody();
     }
 
     /**
