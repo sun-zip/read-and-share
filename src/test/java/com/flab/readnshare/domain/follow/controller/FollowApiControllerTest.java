@@ -51,6 +51,7 @@ class FollowApiControllerTest {
 
     @BeforeEach
     void init() {
+
         mockMvc = MockMvcBuilders
                 .standaloneSetup(followApiController)
                 .setControllerAdvice(apiExceptionAdvice)
@@ -144,6 +145,25 @@ class FollowApiControllerTest {
                     .andDo(print())
                     .andExpect(jsonPath("$.message").value("이미 해당 사용자를 팔로우하고 있습니다."));
         }
+
+        @Test
+        @DisplayName("실패 - 이메일 형식이 아님")
+        void fail_invalid_email() throws Exception {
+            // Given
+            String email = "test@t";
+
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    post(FOLLOW_API_ENDPOINT, email)
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+
+        }
+
     }
 
     @Nested
@@ -207,7 +227,7 @@ class FollowApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    get(FOLLOWERS_API_ENDPOINT, "test")
+                    get(FOLLOWERS_API_ENDPOINT, "test@test.com")
             );
 
             // Then
@@ -251,7 +271,7 @@ class FollowApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    get(FOLLOWINGS_API_ENDPOINT, "test")
+                    get(FOLLOWINGS_API_ENDPOINT, "test@test.com")
             );
 
             // Then

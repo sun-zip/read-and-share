@@ -16,12 +16,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.MultiValueMap;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -52,11 +56,6 @@ class FeedApiControllerTest {
         @DisplayName("성공")
         void success() throws Exception {
             // Given
-            FeedRequestDto request = FeedRequestDto.builder()
-                    .lastReviewId(1L)
-                    .limit(1)
-                    .build();
-
             FeedResponseDto response = FeedResponseDto.builder()
                     .reviewId(1L)
                     .nickName("test")
@@ -69,8 +68,8 @@ class FeedApiControllerTest {
             // When
             ResultActions resultActions = mockMvc.perform(
                     get(GET_FEEDS_API_ENDPOINT)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(new Gson().toJson(request))
+                            .param("lastReviewId", "1")
+                            .param("limit", "1")
             );
 
             // Then
@@ -79,6 +78,51 @@ class FeedApiControllerTest {
                     .andExpect(jsonPath("$.[0].nickName").value("test"))
                     .andExpect(jsonPath("$.[0].content").value("test"))
                     .andExpect(jsonPath("$.[0].bookTitle").value("test"));
+        }
+
+        @Test
+        @DisplayName("실패 - lastReivewId 음수")
+        void fail_negative_last_review_id() throws Exception {
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    get(GET_FEEDS_API_ENDPOINT)
+                            .param("lastReviewId", "-1")
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("실패 - limit 음수")
+        void fail_negative_limit() throws Exception {
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    get(GET_FEEDS_API_ENDPOINT)
+                            .param("limit", "-1")
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("실패 - limit 10보다 큼")
+        void fail_limit_greater_than_10() throws Exception {
+            // When
+            ResultActions resultActions = mockMvc.perform(
+                    get(GET_FEEDS_API_ENDPOINT)
+                            .param("limit", "11")
+            );
+
+            // Then
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
         }
     }
 

@@ -12,7 +12,9 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,12 +35,15 @@ public class FeedApiController {
     @Operation(summary = "피드 조회", description = "자신의 피드를 조회할 때 사용하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.", content = @Content(mediaType = "application/json", examples = {
+                    @ExampleObject(name = "올바르지 않은 입력값", value = "{ \"code\": \"INVALID_INPUT_PARAMETER\", \"message\": \"입력값을 확인하세요.\" }")
+            })),
             @ApiResponse(responseCode = "401", description = "토큰이 없습니다.", content = @Content(mediaType = "application/json",
                     examples = {
                             @ExampleObject(name = "JWT_NULL", value = "{ \"code\": \"JWT_NULL\", \"message\": \"토큰이 없습니다.\" }")
                     }))
     })
-    public ResponseEntity<List<FeedResponseDto>> getFeeds(@ModelAttribute FeedRequestDto dto, @Parameter(hidden = true) @SignInMember Member member) {
+    public ResponseEntity<List<FeedResponseDto>> getFeeds(@ModelAttribute @Valid FeedRequestDto dto, @Parameter(hidden = true) @SignInMember Member member) {
         return new ResponseEntity<>(feedFacade.getFeeds(member.getId(), dto.getLastReviewId(), dto.getLimit()), HttpStatus.OK);
     }
 }
