@@ -1,9 +1,12 @@
 package com.flab.readnshare.domain.member.service;
 
+import com.flab.readnshare.domain.member.domain.Image;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
+import com.flab.readnshare.domain.member.repository.ImageRepository;
 import com.flab.readnshare.domain.member.repository.MemberRepository;
+import com.flab.readnshare.global.common.exception.ImageException;
 import com.flab.readnshare.global.common.exception.MemberException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,14 +30,17 @@ class MemberServiceTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;  // Ensure this is mocked
+    private ImageRepository imageRepository;  // 추가된 ImageRepository 목 객체
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private MemberService memberService;
 
     @Nested
-    @DisplayName("signUp 테스트")
-    class signUp {
+    @DisplayName("회원가입 테스트")
+    class SignUpTest {
         @Test
         @DisplayName("성공")
         void success() {
@@ -42,37 +48,28 @@ class MemberServiceTest {
             SignUpRequestDto request = SignUpRequestDto.builder()
                     .email("test@naver.com")
                     .password("test24680!")
-                    .nickName("test")
+                    .nickName("testUser")
                     .build();
 
-            // 암호화된 비밀번호를 가상으로 설정
-            String encodedPassword = "encodedNewPassword"; // 가상의 암호화된 비밀번호
-            when(passwordEncoder.encode(request.getPassword())).thenReturn(encodedPassword);
+            when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+            when(memberRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
-            // 회원이 존재하지 않으므로 Optional.empty()를 반환
-            when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
-
-            // expectedMember 생성 시, 암호화된 비밀번호를 사용하여 비교
             Member expectedMember = Member.builder()
                     .email(request.getEmail())
-                    .password(encodedPassword)  // 암호화된 비밀번호 사용
+                    .password("encodedPassword")
                     .nickName(request.getNickName())
                     .build();
 
-            // save()가 호출되면 expectedMember를 반환하도록 설정
             when(memberRepository.save(any(Member.class))).thenReturn(expectedMember);
 
             // when
-            // SignUpRequestDto의 toEntity 호출 시 passwordEncoder를 전달
             Member savedMember = memberService.signUp(request, passwordEncoder);
 
             // then
             assertNotNull(savedMember);
             assertEquals("test@naver.com", savedMember.getEmail());
-            assertEquals(encodedPassword, savedMember.getPassword());  // 암호화된 비밀번호가 맞는지 확인
-            assertEquals("test", savedMember.getNickName());
-
-            // memberRepository의 save()가 한 번 호출되었는지 검증
+            assertEquals("encodedPassword", savedMember.getPassword());
+            assertEquals("testUser", savedMember.getNickName());
             verify(memberRepository, times(1)).save(any(Member.class));
         }
 
@@ -83,55 +80,136 @@ class MemberServiceTest {
             SignUpRequestDto request = SignUpRequestDto.builder()
                     .email("test@naver.com")
                     .password("test24680!")
-                    .nickName("test")
+                    .nickName("testUser")
                     .build();
 
-            Optional<Member> m = Optional.of(mock(Member.class));
-            when(memberRepository.findByEmail(request.getEmail())).thenReturn(m);
+            when(memberRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(mock(Member.class)));
 
             // then
-            assertThrows(MemberException.DuplicateEmailException.class, () -> memberService.signUp(request, passwordEncoder), "이메일이 중복되어 회원가입에 실패해야 합니다.");
+            assertThrows(MemberException.DuplicateEmailException.class,
+                    () -> memberService.signUp(request, passwordEncoder));
         }
     }
 
     @Nested
-    @DisplayName("update 테스트")
-    class update {
+    @DisplayName("회원 정보 수정 테스트")
+    class UpdateTest {
         @Test
         @DisplayName("성공")
         void success() {
-            // given (기존 회원 정보)
+            // given
             Long memberId = 1L;
             Member existingMember = Member.builder()
                     .id(memberId)
-                    .email("test@naver.com")  // 기본 이메일은 수정하지 않음
+                    .email("test@naver.com")
                     .password("oldPassword123!")
                     .nickName("oldNickName")
+                    .profileContent("oldContent")
+                    .profileImage(2L)
                     .build();
 
             UpdateRequestDto request = UpdateRequestDto.builder()
-                    .password("newPassword24680!") // 새로운 비밀번호
-                    .nickName("newNickName")       // 새로운 닉네임
+                    .password("newPassword24680!")
+                    .nickName("newNickName")
+                    .profileContent("newContent")
+                    .profileImage(3L)
                     .build();
 
-            // toEntity()로 비밀번호 암호화된 업데이트된 멤버 생성
-            String encodedPassword = "encodedNewPassword"; // 가상의 암호화된 비밀번호
-            when(passwordEncoder.encode(request.getPassword())).thenReturn(encodedPassword);
-
-            // 기존 회원이 존재하는 경우를 가정
+            when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedNewPassword");
             when(memberRepository.findById(memberId)).thenReturn(Optional.of(existingMember));
 
-            // when (실제 메소드를 호출하여 회원정보 수정)
+            // when
             Member updatedMember = memberService.update(memberId, request, passwordEncoder);
 
-            // then (업데이트된 멤버의 닉네임과 비밀번호가 올바르게 수정되었는지 확인)
+            // then
             assertNotNull(updatedMember);
             assertEquals("newNickName", updatedMember.getNickName());
-            assertEquals(encodedPassword, updatedMember.getPassword());
-            assertEquals("test@naver.com", updatedMember.getEmail()); // 이메일은 수정되지 않아야 함
+            assertEquals("encodedNewPassword", updatedMember.getPassword());
+            assertEquals("newContent", updatedMember.getProfileContent());
+            assertEquals(3L, updatedMember.getProfileImage());
+            assertEquals("test@naver.com", updatedMember.getEmail());
 
-            // memberRepository의 save()가 호출되었는지 검증
-            verify(memberRepository, times(1)).save(updatedMember);
+            verify(memberRepository, times(1)).save(existingMember);
+        }
+    }
+
+    @Nested
+    @DisplayName("회원 조회 테스트")
+    class FindByIdTest {
+        @Test
+        @DisplayName("성공")
+        void success() {
+            // given
+            Long memberId = 1L;
+            Member member = Member.builder()
+                    .id(memberId)
+                    .email("test@naver.com")
+                    .nickName("testUser")
+                    .build();
+
+            when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+            // when
+            Member foundMember = memberService.findById(memberId);
+
+            // then
+            assertNotNull(foundMember);
+            assertEquals(memberId, foundMember.getId());
+            assertEquals("test@naver.com", foundMember.getEmail());
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 회원")
+        void fail_memberNotFound() {
+            // given
+            Long memberId = 999L;
+            when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+            // then
+            assertThrows(MemberException.MemberNotFoundException.class, () -> memberService.findById(memberId));
+        }
+    }
+
+    @Nested
+    @DisplayName("이미지 조회 테스트")
+    class FindByImageIdTest {
+        @Test
+        @DisplayName("성공")
+        void success() {
+            // given
+            Long imageId = 1L;
+            Image image = Image.builder()
+                    .id(imageId)
+                    .profileImagePath("https://image-url.com/image.png")
+                    .build();
+
+            when(imageRepository.findById(imageId)).thenReturn(Optional.of(image));
+
+            // when
+            Image foundImage = memberService.findByImageId(imageId);
+
+            // then
+            assertNotNull(foundImage);
+            assertEquals(imageId, foundImage.getId());
+            assertEquals("https://image-url.com/image.png", foundImage.getProfileImagePath());
+        }
+
+        @Test
+        @DisplayName("실패 - 이미지 ID가 null")
+        void fail_nullImageId() {
+            // then
+            assertThrows(IllegalArgumentException.class, () -> memberService.findByImageId(null));
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 이미지 ID")
+        void fail_imageNotFound() {
+            // given
+            Long imageId = 999L;
+            when(imageRepository.findById(imageId)).thenReturn(Optional.empty());
+
+            // then
+            assertThrows(ImageException.NotFoundImageException.class, () -> memberService.findByImageId(imageId));
         }
     }
 }
