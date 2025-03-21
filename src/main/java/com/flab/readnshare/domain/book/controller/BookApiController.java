@@ -1,6 +1,6 @@
 package com.flab.readnshare.domain.book.controller;
 
-import com.flab.readnshare.domain.book.dto.SearchBookDetailReponseDto;
+import com.flab.readnshare.domain.book.dto.SearchBookDetailResponseDto;
 import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.service.BookService;
 import jakarta.validation.constraints.Min;
@@ -51,7 +51,7 @@ public class BookApiController {
      * @return 도서 상세 정보(SearchBookDetailReponseDto)를 포함하는 HTTP 응답 (200 OK)
      */
     @GetMapping("/detail")
-    public ResponseEntity<SearchBookDetailReponseDto> searchBookDetail(@RequestParam String isbn){
+    public ResponseEntity<SearchBookDetailResponseDto> searchBookDetail(@RequestParam String isbn){
         return new ResponseEntity<>(bookService.searchBookDetail(isbn), HttpStatus.OK);
     }
 }

@@ -2,7 +2,7 @@ package com.flab.readnshare.domain.book.service;
 
 import com.flab.readnshare.domain.book.domain.Book;
 import com.flab.readnshare.domain.book.dto.BookDto;
-import com.flab.readnshare.domain.book.dto.SearchBookDetailReponseDto;
+import com.flab.readnshare.domain.book.dto.SearchBookDetailResponseDto;
 import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +72,8 @@ public class BookService {
      * @param isbn 도서의 ISBN 번호
      * @return SearchBookDetailReponseDto 형태의 도서 상세 검색 결과
      */
-    public SearchBookDetailReponseDto searchBookDetail(String isbn) {
+    public SearchBookDetailResponseDto searchBookDetail(String isbn) {
+        HttpEntity<String> httpEntity = getHttpEntitiy();
 
         URI targetUrl = UriComponentsBuilder
                 .fromUriString(SEARCH_BOOK_DETAIL_URL)
@@ -81,7 +82,7 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookDetailReponseDto.class).getBody();
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookDetailResponseDto.class).getBody();
     }
 
     /**

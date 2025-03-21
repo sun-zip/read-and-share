@@ -22,6 +22,10 @@ public enum ErrorCode {
     INVALID_EMAIL_OR_PASSWORD(HttpStatus.BAD_REQUEST, "이메일 또는 패스워드가 일치하지 않습니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "이메일 또는 패스워드가 일치하지 않습니다."),
 
+    // Favorite
+    FAVORITE_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기에 등록된 책이 없습니다."),
+    FAVORITE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "이미 즐겨찾기에 등록되어 있는 책입니다."),
+
     // Review
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 독서 기록 입니다."),
     REVIEW_FORBIDDEN_MEMBER(HttpStatus.FORBIDDEN, "해당 독서 기록에 대한 수정 및 삭제 권한이 없습니다."),
