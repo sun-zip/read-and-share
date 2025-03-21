@@ -1,6 +1,8 @@
 package com.flab.readnshare.domain.member.controller;
 
+import com.flab.readnshare.domain.member.domain.Image;
 import com.flab.readnshare.domain.member.domain.Member;
+import com.flab.readnshare.domain.member.dto.MemberInfoResponseDto;
 import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
@@ -64,16 +66,19 @@ public class MemberApiController {
 
     // 회원조회
     @GetMapping("/{memberId}")
-    public ResponseEntity<MemberResponseDto> findById(@PathVariable Long memberId) {
+    public ResponseEntity<MemberInfoResponseDto> findById(@PathVariable Long memberId) {
         Member member = memberService.findById(memberId);
+        Image image = memberService.findByImageId(member.getProfileImage());
 
-        MemberResponseDto responseDto = MemberResponseDto.builder()
+        MemberInfoResponseDto responseInfoDto = MemberInfoResponseDto.builder()
                 .id(member.getId())
                 .email(member.getEmail())
                 .nickName(member.getNickName())
+                .profileContent(member.getProfileContent())
+                .profileImagePath(image.getProfileImagePath())
                 .build();
 
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ResponseEntity<>(responseInfoDto, HttpStatus.OK);
     }
 
     // 회원삭제
