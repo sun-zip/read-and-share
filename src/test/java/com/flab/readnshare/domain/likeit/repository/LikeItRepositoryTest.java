@@ -117,7 +117,4 @@ public class LikeItRepositoryTest {
 			assertThat(likeItRepository.findByFromMemberAndToReview(toBeDeleted.getFromMember(), toBeDeleted.getToReview())).isEmpty();
 		}
 	}
-
-
-
 }

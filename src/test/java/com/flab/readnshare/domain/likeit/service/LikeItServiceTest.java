@@ -78,7 +78,7 @@ public class LikeItServiceTest {
 			when(likeItRepository.findByFromMemberAndToReview(any(Member.class), any(Review.class))).thenReturn(Optional.empty()); // 항상 검색이 안되도록 세팅
 
 			// when
-			likeItService.toggleLike(toReview.getId(), fromMember);
+			likeItService.toggleLikeIt(toReview.getId(), fromMember);
 
 			// then
 			verify(likeItRepository, times(1)).save(any(LikeIt.class));
@@ -100,7 +100,7 @@ public class LikeItServiceTest {
 			when(likeItRepository.findByFromMemberAndToReview(any(Member.class), any(Review.class))).thenReturn(Optional.of(existingLikeIt)); // 항상 검색이 되도록 세팅
 
 			// when
-			likeItService.toggleLike(1L, fromMember);
+			likeItService.toggleLikeIt(1L, fromMember);
 
 			// then
 			verify(likeItRepository, never()).save(any(LikeIt.class));
@@ -117,7 +117,7 @@ public class LikeItServiceTest {
 			when(reviewRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 			// when & then
-			assertThrows(ReviewException.ReviewNotFoundException.class, () -> likeItService.toggleLike(1L, fromMember));
+			assertThrows(ReviewException.ReviewNotFoundException.class, () -> likeItService.toggleLikeIt(1L, fromMember));
 			verify(likeItRepository, never()).delete(any(LikeIt.class));
 			verify(likeItRepository, never()).save(any(LikeIt.class));
 			verify(eventPublisher, never()).publishEvent(any(LikeItEvent.class));

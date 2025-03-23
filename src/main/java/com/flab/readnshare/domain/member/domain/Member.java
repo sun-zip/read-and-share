@@ -34,4 +34,12 @@ public class Member extends BaseTimeEntity {
         this.nickName = nickName;
         this.password = password;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        return id.equals(member.id);
+    }
 }

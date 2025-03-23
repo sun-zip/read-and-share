@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/review")
+@RequestMapping("/api/v1/review")
 public class LikeItController {
 
 	private final LikeItService likeItService;
 
 	@PostMapping("/{reviewId}/like")
-	public ResponseEntity<Void> toggleLike(@PathVariable Long reviewId, @SignInMember Member signInMember){
-		likeItService.toggleLike(reviewId, signInMember);
+	public ResponseEntity<Void> toggleLikeIt(@PathVariable Long reviewId, @SignInMember Member signInMember){
+		likeItService.toggleLikeIt(reviewId, signInMember);
 		return ResponseEntity.ok().build();
 	}
 

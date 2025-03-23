@@ -25,15 +25,15 @@ public class LikeItService {
 	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public void toggleLike(Long reviewId, Member signInMember) {
+	public void toggleLikeIt(Long reviewId, Member signInMember) {
 		Review review = reviewRepository.findById(reviewId)
 				.orElseThrow(ReviewException.ReviewNotFoundException::new);
 
-		Optional<LikeIt> existingLike = likeItRepository.findByFromMemberAndToReview(signInMember, review);
+		Optional<LikeIt> existingLikeIt = likeItRepository.findByFromMemberAndToReview(signInMember, review);
 
-		if (existingLike.isPresent()) {
+		if (existingLikeIt.isPresent()) {
 			// 이미 좋아요 누름 -> 취소
-			likeItRepository.delete(existingLike.get());
+			likeItRepository.delete(existingLikeIt.get());
 		} else {
 			// 좋아요 누름
 			LikeIt newLikeIt = LikeIt.builder()
