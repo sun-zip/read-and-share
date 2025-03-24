@@ -1,5 +1,6 @@
 package com.flab.readnshare.domain.member.dto;
 
+import com.flab.readnshare.domain.follow.domain.Follow;
 import com.flab.readnshare.domain.member.domain.Member;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +23,25 @@ public class MemberResponseDto {
                 .id(id)
                 .email(email)
                 .nickName(nickName)
+                .build();
+    }
+
+    public static MemberResponseDto fromMemberOf(Follow follow) {
+        Member fromMember = follow.getFromMember();
+
+        return MemberResponseDto.builder()
+                .id(fromMember.getId())
+                .email(fromMember.getEmail())
+                .nickName(fromMember.getNickName())
+                .build();
+    }
+    public static MemberResponseDto toMemberOf(Follow follow) {
+        Member toMember = follow.getToMember();
+
+        return MemberResponseDto.builder()
+                .id(toMember.getId())
+                .email(toMember.getEmail())
+                .nickName(toMember.getNickName())
                 .build();
     }
 

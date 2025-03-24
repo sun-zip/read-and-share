@@ -13,10 +13,7 @@ public class FCMService {
     private final FCMTokenRepository fcmTokenRepository;
 
     public void saveFCMToken(Member member, String token) {
-        FCMToken fcmToken = FCMToken.builder()
-                .memberId(member.getId())
-                .fcmTokenValue(token)
-                .build();
+        FCMToken fcmToken = createToken(member, token);
 
         fcmTokenRepository.save(fcmToken);
     }
@@ -25,5 +22,12 @@ public class FCMService {
         return fcmTokenRepository.findById(memberId)
                 .orElseThrow(MemberException.MemberNotFoundException::new)
                 .getFcmTokenValue();
+    }
+
+    private FCMToken createToken(Member member, String token) {
+        return FCMToken.builder()
+                .memberId(member.getId())
+                .fcmTokenValue(token)
+                .build();
     }
 }

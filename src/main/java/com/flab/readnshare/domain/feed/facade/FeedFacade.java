@@ -4,7 +4,6 @@ import com.flab.readnshare.domain.feed.dto.FeedResponseDto;
 import com.flab.readnshare.domain.review.domain.Review;
 import com.flab.readnshare.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.BoundZSetOperations;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,61 +28,60 @@ public class FeedFacade {
         Long reviewId = review.getId();
 
         feedRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            for (Long followerId : followerIds) {
-                String userFeedKey = String.format(KEY, followerId);
-                BoundZSetOperations<String, Object> operations = feedRedisTemplate.boundZSetOps(userFeedKey);
-                operations.add(String.valueOf(reviewId), timestamp);
-                operations.expire(FEED_EXPIRE_DURATION, TimeUnit.DAYS);
-            }
-
+            followerIds.stream().map(followerId -> getUserFeedKey(followerId))
+                    .forEach(userFeedKey -> {
+                        feedRedisTemplate.boundZSetOps(userFeedKey).add(String.valueOf(reviewId), timestamp);
+                        feedRedisTemplate.boundZSetOps(userFeedKey).expire(FEED_EXPIRE_DURATION, TimeUnit.DAYS);
+                    });
             return null;
         });
     }
 
     public List<FeedResponseDto> getFeeds(Long memberId, Long lastReviewId, int limit) {
-        String userFeedKey = String.format(KEY, memberId);
+        String userFeedKey = getUserFeedKey(memberId);
 
-        Set<Object> feedSet;
-        if (lastReviewId == null) {
-            feedSet = feedRedisTemplate.opsForZSet().reverseRange(userFeedKey, 0, (limit - 1));
-        } else {
-            Double score = feedRedisTemplate.opsForZSet().score(userFeedKey, String.valueOf(lastReviewId));
+        Set<Object> feedSet = getFeedSet(userFeedKey, lastReviewId, limit);
 
-            if (score == null) {
-                return Collections.emptyList();
-            }
-
-            // 마지막 리뷰의 score 이전 데이터들을 역순으로 limit 만큼 조회
-            feedSet = feedRedisTemplate.opsForZSet().reverseRangeByScore(userFeedKey, Double.MIN_VALUE, (score - 1), 0, limit);
-        }
-
-        // 리뷰 ID 리스트 추출
-        List<Long> reviewIds = Optional.ofNullable(feedSet)
-                .orElse(Collections.emptySet())
-                .stream()
-                .map(reviewId -> Long.parseLong((String) reviewId))
-                .collect(Collectors.toList());
-
-        // 리뷰 ID 리스트를 IN 절로 사용하여 리뷰들을 한 번에 조회
+        List<Long> reviewIds = getReviewIdsFrom(feedSet);
         List<Review> reviews = reviewService.findByIdIn(reviewIds);
 
         return reviews.stream()
-                .map(review -> FeedResponseDto.builder()
-                        .reviewId(review.getId())
-                        .nickName(review.getMember().getNickName())
-                        .content(review.getContent())
-                        .bookTitle(review.getBook().getTitle())
-                        .build())
-                .collect(Collectors.toList());
+                .map(review -> FeedResponseDto.from(review))
+                .toList();
     }
 
     public void deleteToFeed(List<Long> followerIds, Long reviewId) {
         feedRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            for (Long followerId : followerIds) {
-                String userFeedKey = String.format(KEY, followerId);
-                feedRedisTemplate.opsForZSet().remove(userFeedKey, String.valueOf(reviewId));
-            }
+            followerIds.stream()
+                    .map(this::getUserFeedKey)
+                    .forEach(userFeedKey -> feedRedisTemplate.opsForZSet().remove(userFeedKey, String.valueOf(reviewId)));
             return null;
         });
     }
+
+    private String getUserFeedKey(Long followerId) {
+        return String.format(KEY, followerId);
+    }
+
+    private Set<Object> getFeedSet(String userFeedKey, Long lastReviewId, int limit) {
+        if (lastReviewId == null) {
+            return feedRedisTemplate.opsForZSet().reverseRange(userFeedKey, 0, (limit - 1));
+        }
+
+        Double score = feedRedisTemplate.opsForZSet().score(userFeedKey, String.valueOf(lastReviewId));
+        if (score == null) {
+            return Collections.emptySet();
+        }
+
+        return feedRedisTemplate.opsForZSet().reverseRangeByScore(userFeedKey, Double.MIN_VALUE, (score - 1), 0, limit);
+    }
+
+    private List<Long> getReviewIdsFrom(Set<Object> feedSet) {
+        return Optional.ofNullable(feedSet)
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(reviewId -> Long.parseLong((String) reviewId))
+                .toList();
+    }
+
 }

@@ -48,7 +48,7 @@ public class FollowApiController {
     })
     @Parameter(name = "toMemberEmail", description = "팔로우 할 사용자 이메일", required = true)
     public ResponseEntity<Void> follow(
-            @PathVariable @Email(regexp="^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String toMemberEmail,
+            @PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String toMemberEmail,
             @Parameter(hidden = true) @SignInMember Member fromMember) {
         followFacade.follow(toMemberEmail, fromMember);
         return new ResponseEntity<>(HttpStatus.CREATED);
@@ -71,7 +71,7 @@ public class FollowApiController {
                     }))
     })
     @Parameter(name = "toMemberEmail", description = "언팔로우 할 사용자 이메일", required = true)
-    public ResponseEntity<Void> unfollow(@PathVariable @Email(regexp="^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String toMemberEmail, @Parameter(hidden = true) @SignInMember Member fromMember) {
+    public ResponseEntity<Void> unfollow(@PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String toMemberEmail, @Parameter(hidden = true) @SignInMember Member fromMember) {
         followFacade.unfollow(toMemberEmail, fromMember);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -93,7 +93,7 @@ public class FollowApiController {
                     }))
     })
     @Parameter(name = "memberEmail", description = "팔로워 조회할 사용자 이메일", required = true)
-    public ResponseEntity<List<MemberResponseDto>> followersOf(@PathVariable @Email(regexp="^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String memberEmail) {
+    public ResponseEntity<List<MemberResponseDto>> followersOf(@PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String memberEmail) {
         List<MemberResponseDto> followers = followFacade.getFollowersOf(memberEmail);
         return new ResponseEntity<>(followers, HttpStatus.OK);
     }
@@ -115,7 +115,7 @@ public class FollowApiController {
                     }))
     })
     @Parameter(name = "memberEmail", description = "팔로잉 조회할 사용자 이메일", required = true)
-    public ResponseEntity<List<MemberResponseDto>> followingsOf(@PathVariable @Email(regexp="^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String memberEmail) {
+    public ResponseEntity<List<MemberResponseDto>> followingsOf(@PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String memberEmail) {
         List<MemberResponseDto> followings = followFacade.getFollowingsOf(memberEmail);
         return new ResponseEntity<>(followings, HttpStatus.OK);
     }
