@@ -23,5 +23,11 @@ public class MemberException extends RuntimeException {
         }
     }
 
+    public static class InvalidTokenException extends MemberException {
+        public InvalidTokenException() { super(ErrorCode.INVALID_EMAIL_TOKEN); }
+    }
 
+    public static class ExpiredTokenException extends MemberException {
+        public ExpiredTokenException() { super(ErrorCode.EXPIRED_EMAIL_TOKEN); }
+    }
 }

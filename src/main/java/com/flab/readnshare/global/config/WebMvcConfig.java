@@ -30,7 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
 //                 Exclusions for authentication
                 .excludePathPatterns("/signUp", "/signIn", "/api/auth/refresh",
-                        "/api/auth/signIn", "/api/member/signUp",
+                        "/api/auth/signIn", "/api/v1/members/signUp", "/api/v1/members/verify",
                         "/swagger-ui/**", "/v3/api-docs/**","/swagger-resources/**","/error");
     }
 
