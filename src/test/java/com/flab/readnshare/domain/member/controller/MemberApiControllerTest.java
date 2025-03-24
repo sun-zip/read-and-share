@@ -7,6 +7,7 @@ import com.flab.readnshare.domain.member.dto.MemberResponseDto;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
 import com.flab.readnshare.domain.member.service.MemberService;
+import com.flab.readnshare.global.common.exception.AuthException;
 import com.flab.readnshare.global.common.advice.ApiExceptionAdvice;
 import com.flab.readnshare.global.common.exception.MemberException;
 import com.google.gson.Gson;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class MemberApiControllerTest {
+
     @Mock
     private MemberService memberService;
 
@@ -66,7 +68,7 @@ class MemberApiControllerTest {
                     .nickName("test")
                     .build();
 
-            given(memberService.signUp(any(SignUpRequestDto.class), any()))
+            given(memberService.signUp(any(SignUpRequestDto.class)))
                     .willReturn(MemberResponseDto.builder()
                             .id(1L)
                             .email("test@naver.com")
@@ -75,7 +77,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/member/signUp")
+                    MockMvcRequestBuilders.post("/api/v1/members/signUp")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -99,7 +101,7 @@ class MemberApiControllerTest {
                     .nickName("test")
                     .build();
 
-            when(memberService.update(anyLong(), any(UpdateRequestDto.class), any()))
+            when(memberService.update(anyLong(), any(UpdateRequestDto.class)))
                     .thenReturn(MemberResponseDto.builder()
                             .id(1L)
                             .email("test@naver.com")
@@ -109,7 +111,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/api/member/1")
+                    MockMvcRequestBuilders.put("/api/v1/members/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -140,7 +142,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/member/search")
+                    MockMvcRequestBuilders.get("/api/v1/members/search")
                             .param("email", email)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -162,7 +164,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/member/search")
+                    MockMvcRequestBuilders.get("/api/v1/members/search")
                             .param("email", email)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -205,7 +207,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)  // URI 경로에 직접 memberId를 전달
+                    MockMvcRequestBuilders.get("/api/v1/members/{memberId}", memberId)  // URI 경로에 직접 memberId를 전달
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -218,7 +220,6 @@ class MemberApiControllerTest {
                     .andExpect(jsonPath("$.profileImagePath").value(profileImagePath));  // profileImagePath 확인
         }
 
-
         @Test
         @DisplayName("실패 - 회원이 없음")
         void fail_memberNotFound() throws Exception {
@@ -229,7 +230,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)
+                    MockMvcRequestBuilders.get("/api/v1/members/{memberId}", memberId)
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -261,7 +262,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)
+                    MockMvcRequestBuilders.get("/api/v1/members/{memberId}", memberId)
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -292,7 +293,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/member/{memberId}", memberId)
+                    MockMvcRequestBuilders.get("/api/v1/members/{memberId}", memberId)
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -315,6 +316,7 @@ class MemberApiControllerTest {
                     .email("test@naver.com")
                     .password("password123!")
                     .nickName("testUser")
+                    .isVerified(true)  // 이메일 인증 여부 추가
                     .build();
 
             when(memberService.findById(memberId)).thenReturn(member);
@@ -322,7 +324,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
+                    MockMvcRequestBuilders.delete("/api/v1/members/{memberId}", memberId)
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
@@ -340,12 +342,34 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.delete("/api/member/{memberId}", memberId)
+                    MockMvcRequestBuilders.delete("/api/v1/members/{memberId}", memberId)
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
             // then
             resultActions.andExpect(status().isNotFound());
+        }
+    }
+
+    // 이메일 인증 관련 테스트 추가
+    @Nested
+    @DisplayName("verifyEmail 테스트")
+    class verifyEmail {
+        @Test
+        @DisplayName("성공")
+        void success() throws Exception {
+            // given
+            String token = "valid-token"; // 유효한 토큰 값을 설정
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get("/api/v1/members/verify")
+                            .param("token", token)
+                            .contentType(MediaType.APPLICATION_JSON)
+            );
+
+            // then
+            resultActions.andExpect(status().isOk());
         }
     }
 }
