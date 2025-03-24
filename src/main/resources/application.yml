@@ -35,7 +35,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: "noreply.readnshare@gmail.com"
-    password: "ellrjhdhannosjfe"
+    password: ${EMAIL_PASSWORD}
     properties:
       mail:
         smtp:
