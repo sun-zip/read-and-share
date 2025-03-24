@@ -41,7 +41,7 @@ public class EmailService {
         sendEmail(toEmail, subject, content);
     }
 
-    protected void sendEmail(String to, String subject, String content) throws MessagingException {
+    private void sendEmail(String to, String subject, String content) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");  // 인코딩을 UTF-8로 설정
 
