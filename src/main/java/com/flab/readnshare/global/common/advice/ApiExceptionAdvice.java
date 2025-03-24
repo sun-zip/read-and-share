@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -88,6 +89,12 @@ public class ApiExceptionAdvice {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex) {
         ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity missingRequestCookieExceptionHandler(MissingRequestCookieException ex) {
+        ErrorResponse response = new ErrorResponse(ErrorCode.JWT_NULL);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
