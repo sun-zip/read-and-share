@@ -50,26 +50,17 @@ public class FollowFacade {
 
         List<Follow> followers = followService.getFollowers(toMember);
         return followers.stream()
-                .map(follow -> follow.getFromMember())
-                .map(member -> MemberResponseDto.builder()
-                        .id(member.getId())
-                        .email(member.getEmail())
-                        .nickName(member.getNickName())
-                        .build())
+                .map(follow -> MemberResponseDto.fromMemberOf(follow))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<MemberResponseDto> getFollowingsOf(String memberEmail) {
         Member fromMember = memberService.findByEmail(memberEmail);
+
         List<Follow> followings = followService.getFollowings(fromMember);
         return followings.stream()
-                .map(following -> following.getToMember())
-                .map(member -> MemberResponseDto.builder()
-                        .id(member.getId())
-                        .email(member.getEmail())
-                        .nickName(member.getNickName())
-                        .build())
+                .map(follow -> MemberResponseDto.toMemberOf(follow))
                 .toList();
     }
 }

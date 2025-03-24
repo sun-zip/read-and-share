@@ -16,15 +16,19 @@ public class FCMNotificationSender<T extends NotificationContent> implements Not
     public void sendNotification(T content) {
         String token = fcmService.getFCMToken(content.getReceiverId());
 
-        Message message = Message.builder()
+        Message message = createMessage(content, token);
+
+        FirebaseMessaging.getInstance().sendAsync(message);
+    }
+
+    private Message createMessage(T content, String token) {
+        return Message.builder()
                 .setNotification(Notification.builder()
                         .setTitle(content.getTitle())
                         .setBody(content.getBody())
                         .build())
                 .setToken(token)
                 .build();
-
-        FirebaseMessaging.getInstance().sendAsync(message);
     }
 
 }

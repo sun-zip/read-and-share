@@ -73,7 +73,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/review")
+                    MockMvcRequestBuilders.post("/api/v1/review")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -90,7 +90,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/review")
+                    MockMvcRequestBuilders.post("/api/v1/review")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -111,7 +111,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/review")
+                    MockMvcRequestBuilders.post("/api/v1/review")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -132,7 +132,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/review")
+                    MockMvcRequestBuilders.post("/api/v1/review")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -159,7 +159,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/review/{reviewId}", reviewId)
+                    delete("/api/v1/review/{reviewId}", reviewId)
             );
 
             // Then
@@ -176,7 +176,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/review/{reviewId}", reviewId)
+                    delete("/api/v1/review/{reviewId}", reviewId)
             );
 
             // Then
@@ -194,7 +194,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    delete("/api/review/{reviewId}", reviewId)
+                    delete("/api/v1/review/{reviewId}", reviewId)
             );
 
             // Then
@@ -218,7 +218,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/api/review/{reviewId}", 1L)
+                    MockMvcRequestBuilders.put("/api/v1/review/{reviewId}", 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -238,7 +238,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/api/review/{reviewId}", 1L)
+                    MockMvcRequestBuilders.put("/api/v1/review/{reviewId}", 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -258,7 +258,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/api/review/{reviewId}", 1L)
+                    MockMvcRequestBuilders.put("/api/v1/review/{reviewId}", 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -275,7 +275,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put("/api/review/{reviewId}", 1L)
+                    MockMvcRequestBuilders.put("/api/v1/review/{reviewId}", 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -305,7 +305,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/review/search/keyword")
+                    MockMvcRequestBuilders.get("/api/v1/review/search/keyword")
                             .param("keyword", keyword)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -342,7 +342,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/review/search/title")
+                    MockMvcRequestBuilders.get("/api/v1/review/search/title")
                             .param("title", title)
                             .accept(MediaType.APPLICATION_JSON)
             );
@@ -374,7 +374,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/review/search/author")
+                    MockMvcRequestBuilders.get("/api/v1/review/search/author")
                             .param("author", author)
                             .accept(MediaType.APPLICATION_JSON)
             );
@@ -405,7 +405,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/review/search/publisher")
+                    MockMvcRequestBuilders.get("/api/v1/review/search/publisher")
                             .param("publisher", publisher)
                             .accept(MediaType.APPLICATION_JSON)
             );
@@ -435,7 +435,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/review/search/member")
+                    MockMvcRequestBuilders.get("/api/v1/review/search/member")
                             .param("memberName", memberName)
                             .accept(MediaType.APPLICATION_JSON)
             );

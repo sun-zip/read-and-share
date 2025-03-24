@@ -18,12 +18,16 @@ public class FollowEventListener {
         Member fromMember = event.getFromMember();
         Member toMember = event.getToMember();
 
-        FollowNotificationContent content = FollowNotificationContent
+        FollowNotificationContent content = createFollowNotificationContent(fromMember, toMember);
+
+        notificationSender.sendNotification(content);
+    }
+
+    private FollowNotificationContent createFollowNotificationContent(Member fromMember, Member toMember) {
+        return FollowNotificationContent
                 .builder()
                 .fromMember(fromMember)
                 .toMember(toMember)
                 .build();
-
-        notificationSender.sendNotification(content);
     }
 }

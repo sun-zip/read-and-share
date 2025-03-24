@@ -1,5 +1,6 @@
 package com.flab.readnshare.domain.feed.dto;
 
+import com.flab.readnshare.domain.review.domain.Review;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,5 +20,14 @@ public class FeedResponseDto {
         this.nickName = nickName;
         this.content = content;
         this.bookTitle = bookTitle;
+    }
+
+    public static FeedResponseDto from(Review review) {
+        return FeedResponseDto.builder()
+                .reviewId(review.getId())
+                .nickName(review.getMember().getNickName())
+                .content(review.getContent())
+                .bookTitle(review.getBook().getTitle())
+                .build();
     }
 }
