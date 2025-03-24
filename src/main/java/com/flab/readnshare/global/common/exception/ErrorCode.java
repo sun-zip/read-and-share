@@ -18,12 +18,17 @@ public enum ErrorCode {
     // Image
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지가 없습니다."),
 
+    // Email
+    INVALID_EMAIL_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 인증 토큰입니다."),
+    EXPIRED_EMAIL_TOKEN(HttpStatus.UNAUTHORIZED, "인증 토큰이 만료되었습니다."),
+
     // Auth
     JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     JWT_DENIED(HttpStatus.UNAUTHORIZED, "조작되거나 지원되지 않는 토큰입니다."),
     JWT_NULL(HttpStatus.UNAUTHORIZED, "토큰이 없습니다."),
     INVALID_EMAIL_OR_PASSWORD(HttpStatus.BAD_REQUEST, "이메일 또는 패스워드가 일치하지 않습니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "이메일 또는 패스워드가 일치하지 않습니다."),
+    UNVERIFIED_EMAIL(HttpStatus.BAD_REQUEST, "인증되지 않은 이메일입니다."),
 
     // Favorite
     FAVORITE_NOT_FOUND(HttpStatus.NOT_FOUND, "즐겨찾기에 등록된 책이 없습니다."),

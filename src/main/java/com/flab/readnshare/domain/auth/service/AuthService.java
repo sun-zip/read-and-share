@@ -34,6 +34,9 @@ public class AuthService {
         if(!passwordEncoder.matches(dto.getPassword(), member.getPassword())){
             throw new AuthException.InvalidEmailOrPasswordException();
         }
+        if(!member.isVerified()) {
+            throw new AuthException.UnverifiedEmailException();
+        }
         return member;
     }
 
