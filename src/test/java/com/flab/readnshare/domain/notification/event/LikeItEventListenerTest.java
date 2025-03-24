@@ -5,7 +5,7 @@ import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.notification.domain.LikeNotificationContent;
 import com.flab.readnshare.domain.notification.service.NotificationSender;
 import com.flab.readnshare.domain.review.domain.Review;
-import com.flab.readnshare.domain.review.event.LikeEvent;
+import com.flab.readnshare.domain.likeit.event.LikeItEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class LikeEventListenerTest {
+class LikeItEventListenerTest {
 
     @Mock
     NotificationSender<LikeNotificationContent> notificationSender;
@@ -34,7 +34,7 @@ class LikeEventListenerTest {
             // Given
             Review review = ReviewTestFixture.getReviewEntity();
             Member member = ReviewTestFixture.getMemberEntity();
-            LikeEvent event = new LikeEvent(new Object(), member, review);
+            LikeItEvent event = new LikeItEvent(new Object(), member, review);
 
             willDoNothing()
                     .given(notificationSender).sendNotification(any(LikeNotificationContent.class));
