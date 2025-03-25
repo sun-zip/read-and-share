@@ -82,7 +82,6 @@ public class BookServiceTest {
             String isbn = "9781234567890";
             SearchBookDetailResponseDto mockResponse = new SearchBookDetailResponseDto();
             ResponseEntity<SearchBookDetailResponseDto> responseEntity = ResponseEntity.ok(mockResponse);
-
             // when
             when(restTemplate.exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(SearchBookDetailResponseDto.class)))
                     .thenReturn(responseEntity);

@@ -6,7 +6,6 @@ import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.repository.MemberRepository;
 import com.flab.readnshare.global.common.auth.jwt.JwtUtil;
 import com.flab.readnshare.global.common.exception.AuthException;
-import com.flab.readnshare.global.common.exception.MemberException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,17 +26,20 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
-
     // 이메일로 회원을 조회하고 비밀번호를 검증하여 로그인을 처리하는 메서드
     public Member signIn(SignInRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(AuthException.InvalidEmailOrPasswordException::new);
-        if(!passwordEncoder.matches(dto.getPassword(), member.getPassword())){
-            throw new AuthException.InvalidEmailOrPasswordException();
-        }
+        validatePassword(dto.getPassword(), member.getPassword());
         if(!member.isVerified()) {
             throw new AuthException.UnverifiedEmailException();
         }
         return member;
+    }
+
+    private void validatePassword(String rawPassword, String encodedPassword) {
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new AuthException.InvalidEmailOrPasswordException();
+        }
     }
 
     // memberId에 대한 access 토큰을 생성 후 HTTP 응답 헤더에 설정
@@ -51,12 +53,17 @@ public class AuthService {
         String refreshToken = jwtUtil.createRefreshToken(memberId);
         jwtUtil.setRefreshTokenCookie(response, refreshToken);
     }
+    // memberId에 대한 access, refresh 토큰을 생성 후 HTTP 응답 헤더와 쿠키에 설정
+    public void issueTokens(HttpServletResponse response, Long memberId) {
+        sendAccessToken(response, memberId);
+        sendRefreshToken(response, memberId);
+        log.info("AccessToken, RefreshToken 발급 완료 - memberId: {}", memberId);
+    }
 
     // refresh 토큰을 삭제하고 새로운 access, refresh 토큰을 발급
     public void updateRefreshToken(HttpServletResponse response, Long memberId, String oldRefreshToken) {
         refreshTokenRepository.deleteById(oldRefreshToken);
-        sendAccessToken(response, memberId);
-        sendRefreshToken(response, memberId);
+        issueTokens(response, memberId);
     }
 
     // refresh 토큰을 검증
@@ -65,5 +72,4 @@ public class AuthService {
             throw new AuthException.ExpiredTokenException();
         }
     }
-
 }

@@ -26,6 +26,15 @@ public class MemberResponseDto {
                 .build();
     }
 
+
+    public static MemberResponseDto from(Member member){
+        return MemberResponseDto.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickName(member.getNickName())
+                .build();
+    }
+
     public static MemberResponseDto fromMemberOf(Follow follow) {
         Member fromMember = follow.getFromMember();
 
@@ -44,5 +53,4 @@ public class MemberResponseDto {
                 .nickName(toMember.getNickName())
                 .build();
     }
-
 }
