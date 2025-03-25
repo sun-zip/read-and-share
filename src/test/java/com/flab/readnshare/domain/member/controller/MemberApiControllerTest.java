@@ -316,7 +316,6 @@ class MemberApiControllerTest {
                     .email("test@naver.com")
                     .password("password123!")
                     .nickName("testUser")
-                    .isVerified(true)  // 이메일 인증 여부 추가
                     .build();
 
             when(memberService.findById(memberId)).thenReturn(member);

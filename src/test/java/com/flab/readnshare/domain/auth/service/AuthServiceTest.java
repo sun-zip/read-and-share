@@ -54,6 +54,8 @@ class AuthServiceTest {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
+        expectedMember.setVerified(true);
+
         when(memberRepository.findByEmail(any(String.class))).thenReturn(Optional.ofNullable(expectedMember));
 
         // when

@@ -136,7 +136,6 @@ class MemberServiceTest {
             when(emailTokenRepository.findByToken(token)).thenReturn(Optional.of(emailToken));
             when(memberRepository.findByEmail(emailToken.getEmail())).thenReturn(Optional.of(Member.builder()
                     .email(emailToken.getEmail())
-                    .isVerified(false)
                     .build()));
 
             // when

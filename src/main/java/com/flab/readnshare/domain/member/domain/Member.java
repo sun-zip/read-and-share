@@ -32,14 +32,14 @@ public class Member extends BaseTimeEntity {
     }
 
     @Builder
-    public Member(Long id, String email, String password, String nickName, String profileContent, Long profileImage, boolean isVerified) {
+    public Member(Long id, String email, String password, String nickName, String profileContent, Long profileImage) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.nickName = nickName;
         this.profileContent = profileContent;
         this.profileImage = profileImage;
-        this.isVerified = isVerified;
+        this.isVerified = false;
     }
 
     // 닉네임, 비밀번호 변경용 updateInfo 추가
