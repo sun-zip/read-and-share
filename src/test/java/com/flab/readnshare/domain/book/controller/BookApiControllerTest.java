@@ -20,6 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class BookApiControllerTest {
+    private static final String BOOK_SEARCH_URL = "/api/v1/books/search";
+    private static final String BOOK_DETAIL_URL = "/api/v1/books/detail";
+
     @Mock
     private BookService bookService;
 
@@ -44,7 +47,7 @@ class BookApiControllerTest {
         void success() throws Exception {
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/book/search")
+                    MockMvcRequestBuilders.get(BOOK_SEARCH_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("keyword", "스프링부트")
             );
@@ -58,7 +61,7 @@ class BookApiControllerTest {
         void fail_page() throws Exception {
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/book/search")
+                    MockMvcRequestBuilders.get(BOOK_SEARCH_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("page", "-1")
             );
@@ -72,9 +75,9 @@ class BookApiControllerTest {
         void fail_display() throws Exception {
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/book/search")
+                    MockMvcRequestBuilders.get(BOOK_SEARCH_URL)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .param("display", "-1")
+                            .param("display", "1", "-1")
             );
 
             // then
@@ -92,7 +95,7 @@ class BookApiControllerTest {
         void search_book_detail_success() throws Exception {
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/book/detail")
+                    MockMvcRequestBuilders.get(BOOK_DETAIL_URL)
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("isbn", "9791169210027")
             );
@@ -106,7 +109,7 @@ class BookApiControllerTest {
         void search_book_detail_fail_isbn() throws Exception {
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/book/search")
+                    MockMvcRequestBuilders.get(BOOK_DETAIL_URL)
                             .contentType(MediaType.APPLICATION_JSON)
             );
 
