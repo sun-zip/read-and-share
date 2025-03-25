@@ -72,6 +72,15 @@ public class ReviewTestFixture {
                 .book(book)
                 .build();
     }
+    public static Review createReview(Member member, Book book, Integer score,String content) {
+        return Review.builder()
+                .id(null)
+                .content(content)
+                .member(member)
+                .book(book)
+                .score(score)
+                .build();
+    }
 
 
     public static Book getBookEntity() {

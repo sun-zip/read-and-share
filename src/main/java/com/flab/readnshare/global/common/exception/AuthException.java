@@ -23,6 +23,12 @@ public class AuthException extends RuntimeException {
         }
     }
 
+    public static class UnverifiedEmailException extends AuthException {
+        public UnverifiedEmailException() {
+            super(ErrorCode.UNVERIFIED_EMAIL);
+        }
+    }
+
     public static class ExpiredTokenException extends AuthException {
         public ExpiredTokenException() {
             super(ErrorCode.JWT_EXPIRED);

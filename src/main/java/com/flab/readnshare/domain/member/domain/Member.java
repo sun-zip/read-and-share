@@ -22,6 +22,7 @@ public class Member extends BaseTimeEntity {
     private String nickName;
     private String profileContent;
     private Long profileImage;
+    private boolean isVerified;  // 이메일 인증 여부 추가
 
     @PrePersist
     public void setDefaultValues() {
@@ -38,6 +39,7 @@ public class Member extends BaseTimeEntity {
         this.nickName = nickName;
         this.profileContent = profileContent;
         this.profileImage = profileImage;
+        this.isVerified = false;
     }
 
     // 닉네임, 비밀번호 변경용 updateInfo 추가
@@ -46,5 +48,17 @@ public class Member extends BaseTimeEntity {
         this.password = password;
         this.profileContent = profileContent;
         this.profileImage = profileImage;
+    }
+
+    public void setVerified(boolean verified) {
+        this.isVerified = verified;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        return id.equals(member.id);
     }
 }

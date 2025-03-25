@@ -30,7 +30,9 @@ public class AuthService {
     public Member signIn(SignInRequestDto dto) {
         Member member = memberRepository.findByEmail(dto.getEmail()).orElseThrow(AuthException.InvalidEmailOrPasswordException::new);
         validatePassword(dto.getPassword(), member.getPassword());
-        log.info("로그인 성공 - email: {}", member.getEmail());
+        if(!member.isVerified()) {
+            throw new AuthException.UnverifiedEmailException();
+        }
         return member;
     }
 

@@ -1,22 +1,27 @@
 package com.flab.readnshare.domain.member.service;
 
+import com.flab.readnshare.domain.member.domain.EmailToken;
 import com.flab.readnshare.domain.member.domain.Image;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.dto.SignUpRequestDto;
 import com.flab.readnshare.domain.member.dto.UpdateRequestDto;
+import com.flab.readnshare.domain.member.repository.EmailTokenRepository;
 import com.flab.readnshare.domain.member.repository.ImageRepository;
 import com.flab.readnshare.domain.member.repository.MemberRepository;
 import com.flab.readnshare.global.common.exception.ImageException;
 import com.flab.readnshare.global.common.exception.MemberException;
+import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +35,13 @@ class MemberServiceTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private ImageRepository imageRepository;  // 추가된 ImageRepository 목 객체
+    private ImageRepository imageRepository;
+
+    @Mock
+    private EmailTokenRepository emailTokenRepository;
+
+    @Mock
+    private EmailService emailService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -39,11 +50,11 @@ class MemberServiceTest {
     private MemberService memberService;
 
     @Nested
-    @DisplayName("회원가입 테스트")
-    class SignUpTest {
+    @DisplayName("signUp 테스트")
+    class signUp {
         @Test
         @DisplayName("성공")
-        void success() {
+        void success() throws MessagingException {
             // given
             SignUpRequestDto request = SignUpRequestDto.builder()
                     .email("test@naver.com")
@@ -53,24 +64,41 @@ class MemberServiceTest {
 
             when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
             when(memberRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
-
-            Member expectedMember = Member.builder()
+            when(memberRepository.save(any(Member.class))).thenReturn(Member.builder()
                     .email(request.getEmail())
                     .password("encodedPassword")
                     .nickName(request.getNickName())
-                    .build();
+                    .build());
 
-            when(memberRepository.save(any(Member.class))).thenReturn(expectedMember);
+            // EmailToken 생성 및 저장 시 어떤 토큰 값이든 받아들이도록 설정
+            when(emailTokenRepository.save(any(EmailToken.class))).thenAnswer(invocation -> {
+                EmailToken token = invocation.getArgument(0);
+                // 저장된 토큰 객체를 그대로 반환
+                return token;
+            });
+
+            // 토큰 캡처를 위한 ArgumentCaptor 생성
+            ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
+            ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
 
             // when
-            Member savedMember = memberService.signUp(request, passwordEncoder);
+            Member savedMember = memberService.signUp(request);
 
             // then
             assertNotNull(savedMember);
             assertEquals("test@naver.com", savedMember.getEmail());
             assertEquals("encodedPassword", savedMember.getPassword());
             assertEquals("testUser", savedMember.getNickName());
+
             verify(memberRepository, times(1)).save(any(Member.class));
+
+            // emailService.sendVerificationEmail 호출 시 전달된 실제 인자 캡처
+            verify(emailService, times(1)).sendVerificationEmail(emailCaptor.capture(), tokenCaptor.capture());
+
+            // 캡처된 값 검증
+            assertEquals("test@naver.com", emailCaptor.getValue());
+            // 토큰 값은 동적으로 생성되므로 null이 아닌지만 확인
+            assertNotNull(tokenCaptor.getValue());
         }
 
         @Test
@@ -87,13 +115,71 @@ class MemberServiceTest {
 
             // then
             assertThrows(MemberException.DuplicateEmailException.class,
-                    () -> memberService.signUp(request, passwordEncoder));
+                    () -> memberService.signUp(request));
         }
     }
 
     @Nested
-    @DisplayName("회원 정보 수정 테스트")
-    class UpdateTest {
+    @DisplayName("verifyEmail 테스트")
+    class verifyEmail {
+        @Test
+        @DisplayName("성공")
+        void success() {
+            // given
+            String token = "valid-token";
+            EmailToken emailToken = EmailToken.builder()
+                    .email("test@naver.com")
+                    .token(token)
+                    .expiryDate(LocalDateTime.now().plusHours(24))
+                    .build();
+
+            when(emailTokenRepository.findByToken(token)).thenReturn(Optional.of(emailToken));
+            when(memberRepository.findByEmail(emailToken.getEmail())).thenReturn(Optional.of(Member.builder()
+                    .email(emailToken.getEmail())
+                    .build()));
+
+            // when
+            memberService.verifyEmail(token);
+
+            // then
+            verify(memberRepository, times(1)).save(any(Member.class));  // Member의 활성화 상태 변경 확인
+            verify(emailTokenRepository, times(1)).delete(emailToken); // 이메일 토큰 삭제 확인
+        }
+
+        @Test
+        @DisplayName("실패 - 만료된 토큰")
+        void fail_expiredToken() {
+            // given
+            String token = "expired-token";
+            EmailToken emailToken = EmailToken.builder()
+                    .email("test@naver.com")
+                    .token(token)
+                    .expiryDate(LocalDateTime.now().minusHours(1))  // 이미 만료된 토큰
+                    .build();
+
+            when(emailTokenRepository.findByToken(token)).thenReturn(Optional.of(emailToken));
+
+            // then
+            assertThrows(MemberException.ExpiredTokenException.class,
+                    () -> memberService.verifyEmail(token));
+        }
+
+        @Test
+        @DisplayName("실패 - 잘못된 토큰")
+        void fail_invalidToken() {
+            // given
+            String token = "invalid-token";
+            when(emailTokenRepository.findByToken(token)).thenReturn(Optional.empty());
+
+            // then
+            assertThrows(MemberException.InvalidTokenException.class,
+                    () -> memberService.verifyEmail(token));
+        }
+    }
+
+    @Nested
+    @DisplayName("update 테스트")
+    class update {
         @Test
         @DisplayName("성공")
         void success() {
@@ -119,7 +205,7 @@ class MemberServiceTest {
             when(memberRepository.findById(memberId)).thenReturn(Optional.of(existingMember));
 
             // when
-            Member updatedMember = memberService.update(memberId, request, passwordEncoder);
+            Member updatedMember = memberService.update(memberId, request);
 
             // then
             assertNotNull(updatedMember);
@@ -134,8 +220,8 @@ class MemberServiceTest {
     }
 
     @Nested
-    @DisplayName("회원 조회 테스트")
-    class FindByIdTest {
+    @DisplayName("findById 테스트")
+    class findById {
         @Test
         @DisplayName("성공")
         void success() {
@@ -171,8 +257,8 @@ class MemberServiceTest {
     }
 
     @Nested
-    @DisplayName("이미지 조회 테스트")
-    class FindByImageIdTest {
+    @DisplayName("findByImageId 테스트")
+    class findByImageId {
         @Test
         @DisplayName("성공")
         void success() {

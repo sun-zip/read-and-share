@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/member")
+@RequestMapping("/api/v1/members")
 public class MemberApiController {
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder; // PasswordEncoder 주입
@@ -26,21 +26,28 @@ public class MemberApiController {
     // 회원가입
     @PostMapping("/signUp")
     public ResponseEntity<MemberResponseDto> signUp(@Valid @RequestBody SignUpRequestDto dto){
-        Member newMember = memberService.signUp(dto, passwordEncoder);
+        Member member = memberService.signUp(dto);
 
         MemberResponseDto responseDto = MemberResponseDto.builder()
-                .id(newMember.getId())
-                .email(newMember.getEmail())
-                .nickName(newMember.getNickName())
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickName(member.getNickName())
                 .build();
 
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
+    // 이메일 인증
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        memberService.verifyEmail(token);
+        return ResponseEntity.ok("이메일 인증이 완료되었습니다!");
+    }
+
     // 회원수정
     @PutMapping("/{memberId}")
     public ResponseEntity<MemberResponseDto> update(@PathVariable Long memberId, @Valid @RequestBody UpdateRequestDto dto){
-        Member updatedMember = memberService.update(memberId, dto, passwordEncoder);
+        Member updatedMember = memberService.update(memberId, dto);
 
         MemberResponseDto responseDto = MemberResponseDto.builder()
                 .id(updatedMember.getId())

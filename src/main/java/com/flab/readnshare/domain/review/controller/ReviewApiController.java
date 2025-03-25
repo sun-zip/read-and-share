@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/review")
+@RequestMapping("/api/v1/review")
 public class ReviewApiController {
     private final ReviewService reviewService;
     private final ReviewFacade reviewFacade;

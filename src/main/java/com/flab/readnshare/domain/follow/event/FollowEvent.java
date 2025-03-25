@@ -1,6 +1,5 @@
 package com.flab.readnshare.domain.follow.event;
 
-import com.flab.readnshare.domain.follow.domain.Follow;
 import com.flab.readnshare.domain.member.domain.Member;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

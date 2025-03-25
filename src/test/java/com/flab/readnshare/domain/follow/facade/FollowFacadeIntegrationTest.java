@@ -4,7 +4,6 @@ import com.flab.readnshare.domain.follow.domain.Follow;
 import com.flab.readnshare.domain.follow.repository.FollowRepository;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.repository.MemberRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional

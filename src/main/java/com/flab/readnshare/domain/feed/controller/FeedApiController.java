@@ -3,8 +3,7 @@ package com.flab.readnshare.domain.feed.controller;
 import com.flab.readnshare.domain.feed.dto.FeedRequestDto;
 import com.flab.readnshare.domain.feed.dto.FeedResponseDto;
 import com.flab.readnshare.domain.feed.facade.FeedFacade;
-import com.flab.readnshare.domain.member.domain.Member;
-import com.flab.readnshare.global.common.resolver.SignInMember;
+import com.flab.readnshare.global.common.resolver.SignInMemberId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +41,7 @@ public class FeedApiController {
                             @ExampleObject(name = "JWT_NULL", value = "{ \"code\": \"JWT_NULL\", \"message\": \"토큰이 없습니다.\" }")
                     }))
     })
-    public ResponseEntity<List<FeedResponseDto>> getFeeds(@ModelAttribute @Valid FeedRequestDto dto, @Parameter(hidden = true) @SignInMember Member member) {
-        return new ResponseEntity<>(feedFacade.getFeeds(member.getId(), dto.getLastReviewId(), dto.getLimit()), HttpStatus.OK);
+    public ResponseEntity<List<FeedResponseDto>> getFeeds(@ModelAttribute @Valid FeedRequestDto dto, @Parameter(hidden = true) @SignInMemberId Long memberId) {
+        return new ResponseEntity<>(feedFacade.getFeeds(memberId, dto.getLastReviewId(), dto.getLimit()), HttpStatus.OK);
     }
 }
