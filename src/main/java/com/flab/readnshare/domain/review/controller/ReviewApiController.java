@@ -1,7 +1,8 @@
 package com.flab.readnshare.domain.review.controller;
 
 import com.flab.readnshare.domain.member.domain.Member;
-import com.flab.readnshare.domain.review.domain.Review;
+import com.flab.readnshare.domain.review.controller.uri.ReviewsApiUri;
+import com.flab.readnshare.domain.review.dto.ReviewSearchCondition;
 import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.SaveReviewRequestDto;
 import com.flab.readnshare.domain.review.dto.UpdateReviewRequestDto;
@@ -20,7 +21,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/review")
+@RequestMapping(ReviewsApiUri.BASE)
 public class ReviewApiController {
     private final ReviewService reviewService;
     private final ReviewFacade reviewFacade;
@@ -45,16 +46,24 @@ public class ReviewApiController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    /**************************
-     추가 기능 < 2025.3.16>
 
-     책 제목으로 리뷰 검색
-     책 작가로 리뷰 검색
-     책 출판사로 리뷰 검색
-     리뷰 작성자 이름으로 리뷰 검색
-     + 키워드 검색
+    @GetMapping
+    public ResponseEntity<List<ReviewSearchResponseDto>> search(@ModelAttribute ReviewSearchCondition condition) {
+        if (condition.countNonEmpty() != 1) {
+            throw new IllegalArgumentException("검색 조건은 하나만 입력해야 합니다.");
+        }
 
-     **************************/
+        if (condition.getTitle() != null) return ResponseEntity.ok(reviewService.searchByBookTitle(condition.getTitle()));
+        if (condition.getAuthor() != null) return ResponseEntity.ok(reviewService.searchByBookAuthor(condition.getAuthor()));
+        if (condition.getPublisher() != null) return ResponseEntity.ok(reviewService.searchByBookPublisher(condition.getPublisher()));
+        if (condition.getMemberName() != null) return ResponseEntity.ok(reviewService.searchByMemberNickName(condition.getMemberName()));
+        if (condition.getKeyword() != null) return ResponseEntity.ok(reviewService.searchByKeyword(condition.getKeyword()));
+
+        throw new IllegalArgumentException("올바른 검색 조건이 없습니다.");
+    }
+
+
+    /*
 
 
     // 책 제목으로 검색
@@ -116,5 +125,7 @@ public class ReviewApiController {
         );
         return ResponseEntity.ok(dto);
     }
+
+    */
 
 }

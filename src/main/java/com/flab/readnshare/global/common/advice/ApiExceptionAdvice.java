@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import java.util.Map;
+
 @RestControllerAdvice
 public class ApiExceptionAdvice {
 
@@ -89,6 +91,12 @@ public class ApiExceptionAdvice {
     public ResponseEntity httpMessageNotReadableExceptionHandler(HttpMessageNotReadableException ex) {
         ErrorResponse response = new ErrorResponse(ErrorCode.INVALID_INPUT_PARAMETER);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String,String>> handleIllegalArgEx(IllegalArgumentException e) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", e.getMessage()));
     }
 
 }
