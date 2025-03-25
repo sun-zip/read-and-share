@@ -34,6 +34,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 class AuthApiControllerTest {
+
+    private static final String AUTH_SIGN_IN_URL = "/api/v1/auth/signIn";
+    private static final String AUTH_REFRESH_URL = "/api/v1/auth/refresh";
+
+
     @Mock
     private AuthService authService;
     @Mock
@@ -44,8 +49,8 @@ class AuthApiControllerTest {
     private RefreshTokenRepository refreshTokenRepository;
     @InjectMocks
     private AuthApiController authApiController;
-    @InjectMocks
-    ApiExceptionAdvice apiExceptionAdvice;
+
+    private final ApiExceptionAdvice apiExceptionAdvice = new ApiExceptionAdvice();
 
     private MockMvc mockMvc;
 
@@ -72,7 +77,7 @@ class AuthApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/auth/signIn")
+                MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new Gson().toJson(request))
         );
@@ -93,7 +98,7 @@ class AuthApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/auth/signIn")
+                MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new Gson().toJson(request))
         );
@@ -113,7 +118,7 @@ class AuthApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/auth/signIn")
+                MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new Gson().toJson(request))
         );
@@ -133,7 +138,7 @@ class AuthApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/auth/refresh")
+                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(refreshTokenCookie)
         );
@@ -151,7 +156,7 @@ class AuthApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/auth/refresh")
+                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(refreshTokenCookie)
         );
@@ -171,7 +176,7 @@ class AuthApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/auth/refresh")
+                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(refreshTokenCookie)
         );
@@ -191,7 +196,7 @@ class AuthApiControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/auth/refresh")
+                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(refreshTokenCookie)
         );
