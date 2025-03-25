@@ -42,7 +42,6 @@ public class MemberService {
                 .email(dto.getEmail())
                 .password(encodedPassword)
                 .nickName(dto.getNickName())
-                .isVerified(false)  // 이메일 인증 전까지 비활성화
                 .build();
 
         memberRepository.save(member);
