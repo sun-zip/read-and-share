@@ -31,7 +31,7 @@ public class MemberService {
 
     // 회원가입
     @Transactional
-    public Member signUp(SignUpRequestDto dto) {
+    public Member signup(SignUpRequestDto dto) {
         validateDuplicateMember(dto.getEmail());
 
         // 비밀번호 암호화

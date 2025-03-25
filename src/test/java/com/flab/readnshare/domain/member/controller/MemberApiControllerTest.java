@@ -68,7 +68,7 @@ class MemberApiControllerTest {
                     .nickName("test")
                     .build();
 
-            given(memberService.signUp(any(SignUpRequestDto.class)))
+            given(memberService.signup(any(SignUpRequestDto.class)))
                     .willReturn(MemberResponseDto.builder()
                             .id(1L)
                             .email("test@naver.com")
