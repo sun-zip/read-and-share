@@ -4,6 +4,7 @@ import com.flab.readnshare.domain.book.dto.BookDto;
 import com.flab.readnshare.domain.favorite.service.FavoriteBookService;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.global.common.advice.ApiExceptionAdvice;
+import com.flab.readnshare.global.common.exception.BookException;
 import com.flab.readnshare.global.common.exception.FavoriteException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,8 +46,7 @@ class FavoriteControllerTest {
     @InjectMocks
     FavoriteController favoriteController;
 
-    @InjectMocks
-    ApiExceptionAdvice apiExceptionAdvice;
+    ApiExceptionAdvice apiExceptionAdvice = new ApiExceptionAdvice();
 
     MockMvc mockMvc;
 
@@ -79,7 +79,7 @@ class FavoriteControllerTest {
         @Test
         @DisplayName("성공 - 즐겨찾기 추가")
         void success() throws Exception {
-            String isbn = "12345";
+            String isbn = "1234567890123";
 
             // 서비스에서는 예외 없이 정상적으로 처리한다고 가정
             ResultActions resultActions = mockMvc.perform(
@@ -94,9 +94,29 @@ class FavoriteControllerTest {
         }
 
         @Test
+        @DisplayName("실패 - 책을 찾을 수 없음")
+        void fail_addFavorite_bookNotFound() throws Exception{
+            String isbn = "1234567890123";
+            // 예: 책을 찾을 수 없는 경우 BookNotFound 예외 발생
+            willThrow(new BookException.BookNotFound())
+                    .given(favoriteBookService).addFavorite(any(Member.class), eq(isbn));
+
+            ResultActions resultActions = mockMvc.perform(
+                    post(FAVORITES_API_ENDPOINT)
+                            .param("isbn", isbn)
+            );
+
+            resultActions
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    // 예외 처리 Advice에서 전달하는 JSON 형식의 메시지 검증 (메시지는 상황에 따라 변경)
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 책입니다."));
+        }
+
+        @Test
         @DisplayName("실패 - 즐겨찾기 추가 중 예외 발생")
         void fail_addFavorite() throws Exception {
-            String isbn = "12345";
+            String isbn = "1234567890123";
             // 예: 이미 즐겨찾기에 등록된 경우 FavoriteAlreadyExist 예외 발생
             willThrow(new FavoriteException.FavoriteAlreadyExist())
                     .given(favoriteBookService).addFavorite(any(Member.class), eq(isbn));

@@ -42,6 +42,12 @@ public class ApiExceptionAdvice {
         return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
     }
 
+    @ExceptionHandler(BookException.class)
+    public ResponseEntity bookExceptionHandler(BookException ex) {
+        ErrorResponse response = new ErrorResponse(ex.getErrorCode());
+        return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
+    }
+
     @ExceptionHandler(FavoriteException.class)
     public ResponseEntity favoriteExceptionHandler(FavoriteException ex) {
         ErrorResponse response = new ErrorResponse(ex.getErrorCode());

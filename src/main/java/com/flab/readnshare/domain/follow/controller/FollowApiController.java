@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.cbor.MappingJackson2CborHttpMessageConverter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -53,7 +54,6 @@ public class FollowApiController {
         followFacade.follow(toMemberEmail, fromMember);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
     @DeleteMapping("/{toMemberEmail}")
     @Operation(summary = "언팔로우", description = "특정 사용자를 언팔로우할 때 사용하는 API")
     @ApiResponses(value = {

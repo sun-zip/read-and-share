@@ -9,10 +9,9 @@ import com.flab.readnshare.domain.book.service.BookService;
 import com.flab.readnshare.domain.favorite.domain.FavoriteBook;
 import com.flab.readnshare.domain.favorite.repository.FavoriteBookRepository;
 import com.flab.readnshare.domain.member.domain.Member;
-import com.flab.readnshare.domain.member.repository.MemberRepository;
 import com.flab.readnshare.domain.member.service.MemberService;
+import com.flab.readnshare.global.common.exception.BookException;
 import com.flab.readnshare.global.common.exception.FavoriteException;
-import com.flab.readnshare.global.common.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,14 @@ public class FavoriteBookService {
 
         // 1. DB에서 책 조회 (없으면 도서 정보 저장)
         Book book = bookRepository.findByIsbn(isbn)
-                .orElseGet(() -> bookRepository.save(bookService.searchBookDetail(isbn).toEntity()));
+                .orElseGet(() -> {
+                    SearchBookDetailResponseDto detailResponse = bookService.searchBookDetail(isbn);
+                    // 결과가 없을 경우 예외처리
+                    if (detailResponse == null || detailResponse.getItems().isEmpty()) {
+                        throw new BookException.BookNotFound();
+                    }
+                    return bookRepository.save(detailResponse.toEntity());
+                });
 
         // 이미 즐겨찾기에 등록되어 있는지 확인
         favoriteBookRepository.findByMemberAndBook(member,book)
@@ -81,7 +87,7 @@ public class FavoriteBookService {
         List<FavoriteBook> favorites = favoriteBookRepository.findFavoritesWithBookByMember(member);
 
          return favorites.stream()
-                .map(fb -> convertToSearchBookResponseDto(fb.getBook()))
+                .map(fb -> convertToBookDto(fb.getBook()))
                 .collect(Collectors.toList());
     }
 
@@ -91,7 +97,7 @@ public class FavoriteBookService {
      * @param book
      * @return
      */
-    private BookDto convertToSearchBookResponseDto(Book book) {
+    private BookDto convertToBookDto(Book book) {
         return BookDto.builder()
                 .id(book.getId())
                 .isbn(book.getIsbn())
