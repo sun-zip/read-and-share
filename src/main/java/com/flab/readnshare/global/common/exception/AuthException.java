@@ -40,5 +40,4 @@ public class AuthException extends RuntimeException {
             super(ErrorCode.JWT_NULL);
         }
     }
-
 }

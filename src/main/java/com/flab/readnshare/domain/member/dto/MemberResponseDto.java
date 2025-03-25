@@ -25,4 +25,12 @@ public class MemberResponseDto {
                 .build();
     }
 
+    public static MemberResponseDto from(Member member){
+        return MemberResponseDto.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickName(member.getNickName())
+                .build();
+    }
+
 }
