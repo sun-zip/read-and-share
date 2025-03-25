@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class MemberApiController {
     private final PasswordEncoder passwordEncoder; // PasswordEncoder 주입
 
     // 회원가입
-    @PostMapping("/signUp")
+    @PostMapping("/signup")
     public ResponseEntity<MemberResponseDto> signUp(@Valid @RequestBody SignUpRequestDto dto){
         Member member = memberService.signUp(dto);
 
@@ -38,7 +40,7 @@ public class MemberApiController {
     }
 
     // 이메일 인증
-    @GetMapping("/verify")
+    @PostMapping("/verification")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         memberService.verifyEmail(token);
         return ResponseEntity.ok("이메일 인증이 완료되었습니다!");
@@ -59,7 +61,7 @@ public class MemberApiController {
     }
 
     // 이메일 기반 회원 검색
-    @GetMapping("/search")
+    @GetMapping
     public ResponseEntity<MemberResponseDto> searchMember(@Valid @RequestParam String email){
         Member member = memberService.findByEmail(email);
 
@@ -102,6 +104,6 @@ public class MemberApiController {
         }
 
         memberService.delete(memberId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 }
