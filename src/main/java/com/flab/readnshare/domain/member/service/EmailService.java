@@ -20,26 +20,31 @@ public class EmailService {
 
     public void sendVerificationEmail(String toEmail, String token) throws MessagingException {
         String subject = "ReadNShare 이메일 인증을 완료해주세요!";
-        String verificationLink = "http://localhost:8080/api/v1/members/verify?token=" + token;
+        String verificationLink = "http://localhost:8080/api/v1/members/verification"; // POST 요청 URI
 
-        // HTML 이메일 내용
+        // HTML 이메일 내용 (폼을 사용하여 POST 요청을 보냄)
         String content = "<html>"
                 + "<body>"
                 + "<h2>이메일 인증을 완료하세요</h2>"
                 + "<p>다음 버튼을 클릭하여 이메일 인증을 완료하세요:</p>"
-                + "<a href='" + verificationLink + "' style='"
-                + "display: inline-block;"
+                + "<form action='" + verificationLink + "' method='POST' style='display: inline;'>"
+                + "<input type='hidden' name='token' value='" + token + "'/>"
+                + "<button type='submit' style='"
                 + "padding: 10px 20px;"
                 + "background-color: #4CAF50;"
                 + "color: white;"
                 + "text-align: center;"
                 + "text-decoration: none;"
-                + "border-radius: 5px;'>이메일 인증</a>"
+                + "border: none;"
+                + "border-radius: 5px;"
+                + "cursor: pointer;'>이메일 인증</button>"
+                + "</form>"
                 + "</body>"
                 + "</html>";
 
         sendEmail(toEmail, subject, content);
     }
+
 
     private void sendEmail(String to, String subject, String content) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
