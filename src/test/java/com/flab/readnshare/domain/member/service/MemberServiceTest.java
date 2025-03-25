@@ -82,7 +82,7 @@ class MemberServiceTest {
             ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
 
             // when
-            Member savedMember = memberService.signUp(request);
+            Member savedMember = memberService.signup(request);
 
             // then
             assertNotNull(savedMember);
@@ -115,7 +115,7 @@ class MemberServiceTest {
 
             // then
             assertThrows(MemberException.DuplicateEmailException.class,
-                    () -> memberService.signUp(request));
+                    () -> memberService.signup(request));
         }
     }
 

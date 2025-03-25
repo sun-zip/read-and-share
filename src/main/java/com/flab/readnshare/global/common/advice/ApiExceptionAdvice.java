@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -39,6 +40,12 @@ public class ApiExceptionAdvice {
 
     @ExceptionHandler(AuthException.class)
     public ResponseEntity authExceptionHandler(AuthException ex) {
+        ErrorResponse response = new ErrorResponse(ex.getErrorCode());
+        return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
+    }
+
+    @ExceptionHandler(BookException.class)
+    public ResponseEntity bookExceptionHandler(BookException ex) {
         ErrorResponse response = new ErrorResponse(ex.getErrorCode());
         return new ResponseEntity<>(response, ex.getErrorCode().getStatus());
     }
@@ -93,10 +100,16 @@ public class ApiExceptionAdvice {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String,String>> handleIllegalArgEx(IllegalArgumentException e) {
         return ResponseEntity.badRequest()
                 .body(Map.of("message", e.getMessage()));
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity missingRequestCookieExceptionHandler(MissingRequestCookieException ex) {
+        ErrorResponse response = new ErrorResponse(ErrorCode.JWT_NULL);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 }

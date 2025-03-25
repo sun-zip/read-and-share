@@ -56,7 +56,7 @@ class MemberApiControllerTest {
     }
 
     @Nested
-    @DisplayName("signUp 테스트")
+    @DisplayName("signup 테스트")
     class signup {
         @Test
         @DisplayName("성공")
@@ -68,7 +68,7 @@ class MemberApiControllerTest {
                     .nickName("test")
                     .build();
 
-            given(memberService.signUp(any(SignUpRequestDto.class)))
+            given(memberService.signup(any(SignUpRequestDto.class)))
                     .willReturn(MemberResponseDto.builder()
                             .id(1L)
                             .email("test@naver.com")
@@ -77,7 +77,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/v1/members/signUp")
+                    MockMvcRequestBuilders.post("/api/v1/members/signup")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -142,7 +142,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/v1/members/search")
+                    MockMvcRequestBuilders.get("/api/v1/members")
                             .param("email", email)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -164,7 +164,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/v1/members/search")
+                    MockMvcRequestBuilders.get("/api/v1/members")
                             .param("email", email)
                             .contentType(MediaType.APPLICATION_JSON)
             );
@@ -328,7 +328,7 @@ class MemberApiControllerTest {
             );
 
             // then
-            resultActions.andExpect(status().isOk());
+            resultActions.andExpect(status().isNoContent());
         }
 
         @Test
@@ -362,7 +362,7 @@ class MemberApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/v1/members/verify")
+                    MockMvcRequestBuilders.post("/api/v1/members/verification")
                             .param("token", token)
                             .contentType(MediaType.APPLICATION_JSON)
             );

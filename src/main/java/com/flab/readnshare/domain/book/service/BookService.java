@@ -32,8 +32,8 @@ public class BookService {
     @Value("${naver.book.secret}")
     private String clientSecret;
 
-    private final String SEARCH_BOOK_URL = "https://openapi.naver.com/v1/search/book.json?display=10";
-    private final String SEARCH_BOOK_DETAIL_URL = "https://openapi.naver.com/v1/search/book_adv.json";
+    private static final String SEARCH_BOOK_URL = "https://openapi.naver.com/v1/search/book.json?display=10";
+    private static final String SEARCH_BOOK_DETAIL_URL = "https://openapi.naver.com/v1/search/book_adv.json";
 
     private final RestTemplate restTemplate;
     private final BookRepository bookRepository;
@@ -56,10 +56,11 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        SearchBookResponseDto response = restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookResponseDto.class).getBody();
+        SearchBookResponseDto response = restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntity(), SearchBookResponseDto.class).getBody();
 
         int totalItems = response.getTotal() != null ? response.getTotal() : 0;
-        int totalPages = (totalItems / display) + (totalItems % display == 0 ? 0 : 1);
+        //int totalPages = (totalItems / display) + (totalItems % display == 0 ? 0 : 1);
+        int totalPages = (int) Math.ceil((double) totalItems / display);
         response.setDisplay(display);
         response.setCurrentPage(page);
         response.setTotalPage(totalPages);
@@ -73,8 +74,6 @@ public class BookService {
      * @return SearchBookDetailReponseDto 형태의 도서 상세 검색 결과
      */
     public SearchBookDetailResponseDto searchBookDetail(String isbn) {
-        HttpEntity<String> httpEntity = getHttpEntitiy();
-
         URI targetUrl = UriComponentsBuilder
                 .fromUriString(SEARCH_BOOK_DETAIL_URL)
                 .queryParam("d_isbn", isbn)
@@ -82,7 +81,7 @@ public class BookService {
                 .encode(StandardCharsets.UTF_8)
                 .toUri();
 
-        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntitiy(), SearchBookDetailResponseDto.class).getBody();
+        return restTemplate.exchange(targetUrl, HttpMethod.GET, getHttpEntity(), SearchBookDetailResponseDto.class).getBody();
     }
 
     /**
@@ -91,7 +90,7 @@ public class BookService {
      *
      * @return HttpEntity 객체
      */
-    private HttpEntity<String> getHttpEntitiy() {
+    private HttpEntity<String> getHttpEntity() {
         // 헤더 인증 정보 추가
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("X-Naver-Client-Id", clientId);
@@ -112,5 +111,4 @@ public class BookService {
                 .orElseGet(() -> bookRepository.save(dto.toEntity()));
         return book;
     }
-
 }
