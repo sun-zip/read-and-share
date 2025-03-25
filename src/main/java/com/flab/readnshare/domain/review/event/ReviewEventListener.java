@@ -17,7 +17,7 @@ public class ReviewEventListener {
     private final FeedFacade feedFacade;
 
     @TransactionalEventListener
-    private void updateFollowersFeed(ReviewCreateEvent event) {
+    public void updateFollowersFeed(ReviewCreateEvent event) {
         Member writer = event.getMember();
         Review review = event.getReview();
 
@@ -29,7 +29,7 @@ public class ReviewEventListener {
     }
 
     @TransactionalEventListener
-    private void deleteReviewFromFeed(ReviewDeleteEvent event) {
+    public void deleteReviewFromFeed(ReviewDeleteEvent event) {
         Member writer = event.getMember();
         Long reviewId = event.getReviewId();
 
