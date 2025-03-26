@@ -3,23 +3,21 @@ package com.flab.readnshare.domain.likeit.controller;
 
 import com.flab.readnshare.domain.likeit.service.LikeItService;
 import com.flab.readnshare.domain.member.domain.Member;
-import com.flab.readnshare.domain.review.controller.uri.ReviewsApiUri;
 import com.flab.readnshare.global.common.advice.ApiExceptionAdvice;
 import com.flab.readnshare.global.common.exception.ReviewException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,6 +32,10 @@ public class LikeItControllerTest {
 	private LikeItService likeItService;
 
 	private MockMvc mockMvc;
+
+	public static final String BASE = "/api/v1/reviews";
+	public static final String BY_ID = BASE + "/{reviewId}";
+	public static final String LIKE = BY_ID + "/likes";
 
 	@BeforeEach
 	void setUp(){
@@ -54,7 +56,7 @@ public class LikeItControllerTest {
 			Member mockMember = Member.builder().id(1L).nickName("tester").build();
 
 			// when & then
-			mockMvc.perform(post(ReviewsApiUri.LIKE, reviewId)
+			mockMvc.perform(post(LIKE, reviewId)
 					.requestAttr("signInMember", mockMember))
 					.andExpect(status().isOk());
 
@@ -72,14 +74,12 @@ public class LikeItControllerTest {
 			doThrow(new ReviewException.ReviewNotFoundException())
 					.when(likeItService).toggleLikeIt(eq(reviewId), any(Member.class));
 
-			mockMvc.perform(post(ReviewsApiUri.LIKE, reviewId)
+			mockMvc.perform(post(LIKE, reviewId)
 							.requestAttr("signInMember", mockMember))
 					.andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.message").value("존재하지 않는 독서 기록 입니다."));
 		}
 
-
 	}
-
 
 }

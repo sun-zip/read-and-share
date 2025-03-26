@@ -105,6 +105,7 @@ public class ApiExceptionAdvice {
     public ResponseEntity<Map<String,String>> handleIllegalArgEx(IllegalArgumentException e) {
         return ResponseEntity.badRequest()
                 .body(Map.of("message", e.getMessage()));
+    }
 
     @ExceptionHandler(MissingRequestCookieException.class)
     public ResponseEntity missingRequestCookieExceptionHandler(MissingRequestCookieException ex) {

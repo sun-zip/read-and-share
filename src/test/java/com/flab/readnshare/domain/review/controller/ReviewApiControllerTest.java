@@ -3,7 +3,6 @@ package com.flab.readnshare.domain.review.controller;
 import com.flab.readnshare.ReviewTestFixture;
 import com.flab.readnshare.domain.book.dto.BookDto;
 import com.flab.readnshare.domain.member.domain.Member;
-import com.flab.readnshare.domain.review.controller.uri.ReviewsApiUri;
 import com.flab.readnshare.domain.review.domain.Review;
 import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.SaveReviewRequestDto;
@@ -51,6 +50,9 @@ class ReviewApiControllerTest {
 
     private MockMvc mockMvc;
 
+    public static final String BASE = "/api/v1/reviews";
+    public static final String BY_ID = BASE + "/{reviewId}";
+
     @BeforeEach
     public void init() {
         mockMvc = MockMvcBuilders
@@ -72,7 +74,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post(ReviewsApiUri.BASE)
+                    MockMvcRequestBuilders.post(BASE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -89,7 +91,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post(ReviewsApiUri.BASE)
+                    MockMvcRequestBuilders.post(BASE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -110,7 +112,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post(ReviewsApiUri.BASE)
+                    MockMvcRequestBuilders.post(BASE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -131,7 +133,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.post(ReviewsApiUri.BASE)
+                    MockMvcRequestBuilders.post(BASE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -158,7 +160,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    delete(ReviewsApiUri.BY_ID, reviewId)
+                    delete(BY_ID, reviewId)
             );
 
             // Then
@@ -175,7 +177,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    delete(ReviewsApiUri.BY_ID, reviewId)
+                    delete(BY_ID, reviewId)
             );
 
             // Then
@@ -193,7 +195,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    delete(ReviewsApiUri.BY_ID, reviewId)
+                    delete(BY_ID, reviewId)
             );
 
             // Then
@@ -217,7 +219,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put(ReviewsApiUri.BY_ID, 1L)
+                    MockMvcRequestBuilders.put(BY_ID, 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -237,7 +239,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put(ReviewsApiUri.BY_ID, 1L)
+                    MockMvcRequestBuilders.put(BY_ID, 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -257,7 +259,7 @@ class ReviewApiControllerTest {
 
             // When
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put(ReviewsApiUri.BY_ID, 1L)
+                    MockMvcRequestBuilders.put(BY_ID, 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -274,7 +276,7 @@ class ReviewApiControllerTest {
 
             // when
             ResultActions resultActions = mockMvc.perform(
-                    MockMvcRequestBuilders.put(ReviewsApiUri.BY_ID, 1L)
+                    MockMvcRequestBuilders.put(BY_ID, 1L)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new Gson().toJson(request))
             );
@@ -309,7 +311,7 @@ class ReviewApiControllerTest {
 
                 // when
                 ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.get(ReviewsApiUri.BASE)
+                        MockMvcRequestBuilders.get(BASE)
                                 .param("title", title)
                                 .accept(MediaType.APPLICATION_JSON)
                 );
@@ -341,7 +343,7 @@ class ReviewApiControllerTest {
 
                 // when
                 ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.get(ReviewsApiUri.BASE)
+                        MockMvcRequestBuilders.get(BASE)
                                 .param("author", author)
                                 .accept(MediaType.APPLICATION_JSON)
                 );
@@ -372,7 +374,7 @@ class ReviewApiControllerTest {
 
                 // when
                 ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.get(ReviewsApiUri.BASE)
+                        MockMvcRequestBuilders.get(BASE)
                                 .param("publisher", publisher)
                                 .accept(MediaType.APPLICATION_JSON)
                 );
@@ -402,7 +404,7 @@ class ReviewApiControllerTest {
 
                 // when
                 ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.get(ReviewsApiUri.BASE)
+                        MockMvcRequestBuilders.get(BASE)
                                 .param("memberName", memberName)
                                 .accept(MediaType.APPLICATION_JSON)
                 );
@@ -434,7 +436,7 @@ class ReviewApiControllerTest {
 
                 // when
                 ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.get(ReviewsApiUri.BASE)
+                        MockMvcRequestBuilders.get(BASE)
                                 .param("keyword", keyword)
                                 .contentType(MediaType.APPLICATION_JSON)
                 );
@@ -456,7 +458,7 @@ class ReviewApiControllerTest {
         @Test
         @DisplayName("검색 실패 - 파라미터 없음")
         public void fail_no_param() throws Exception {
-            mockMvc.perform(MockMvcRequestBuilders.get(ReviewsApiUri.BASE))
+            mockMvc.perform(MockMvcRequestBuilders.get(BASE))
 					.andExpect(status().isBadRequest())
 					.andExpect(jsonPath("$.message").value("검색 조건은 하나만 입력해야 합니다."));
 
@@ -467,7 +469,7 @@ class ReviewApiControllerTest {
         @Test
         @DisplayName("검색 실패 - 파라미터 2개 이상")
         void fail_multiple_params() throws Exception {
-            mockMvc.perform(MockMvcRequestBuilders.get(ReviewsApiUri.BASE)
+            mockMvc.perform(MockMvcRequestBuilders.get(BASE)
                             .param("title", "Java")
                             .param("author", "Smith"))
                     .andExpect(status().isBadRequest())
