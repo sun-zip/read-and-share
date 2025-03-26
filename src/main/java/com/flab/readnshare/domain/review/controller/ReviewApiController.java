@@ -1,6 +1,7 @@
 package com.flab.readnshare.domain.review.controller;
 
 import com.flab.readnshare.domain.member.domain.Member;
+import com.flab.readnshare.domain.review.domain.Review;
 import com.flab.readnshare.domain.review.dto.ReviewSearchCondition;
 import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.SaveReviewRequestDto;
@@ -45,6 +46,19 @@ public class ReviewApiController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+	@GetMapping("/{reviewId}")
+	public ResponseEntity<ReviewSearchResponseDto> findById(@PathVariable Long reviewId) {
+		Review review = reviewService.findById(reviewId);
+		ReviewSearchResponseDto dto = new ReviewSearchResponseDto(
+				review.getId(),
+				review.getContent(),
+				review.getBook().getTitle(),
+				review.getBook().getAuthor(),
+				review.getBook().getPublisher(),
+				review.getMember().getNickName()
+		);
+		return ResponseEntity.ok(dto);
+	}
 
     @GetMapping
     public ResponseEntity<List<ReviewSearchResponseDto>> search(@ModelAttribute ReviewSearchCondition condition) {
@@ -52,13 +66,13 @@ public class ReviewApiController {
             throw new IllegalArgumentException("검색 조건은 하나만 입력해야 합니다.");
         }
 
-        if (condition.getTitle() != null) return ResponseEntity.ok(reviewService.searchByBookTitle(condition.getTitle()));
-        if (condition.getAuthor() != null) return ResponseEntity.ok(reviewService.searchByBookAuthor(condition.getAuthor()));
-        if (condition.getPublisher() != null) return ResponseEntity.ok(reviewService.searchByBookPublisher(condition.getPublisher()));
-        if (condition.getMemberName() != null) return ResponseEntity.ok(reviewService.searchByMemberNickName(condition.getMemberName()));
-        if (condition.getKeyword() != null) return ResponseEntity.ok(reviewService.searchByKeyword(condition.getKeyword()));
-
-        throw new IllegalArgumentException("올바른 검색 조건이 없습니다.");
+		return switch (condition.inputArgument()) {
+			case "title" -> ResponseEntity.ok(reviewService.searchByBookTitle(condition.getTitle()));
+			case "author" -> ResponseEntity.ok(reviewService.searchByBookAuthor(condition.getAuthor()));
+			case "publisher" -> ResponseEntity.ok(reviewService.searchByBookPublisher(condition.getPublisher()));
+			case "memberName" -> ResponseEntity.ok(reviewService.searchByMemberNickName(condition.getMemberName()));
+			default -> ResponseEntity.ok(reviewService.searchByKeyword(condition.getKeyword()));
+		};
     }
 
 
@@ -109,20 +123,6 @@ public class ReviewApiController {
             throw new IllegalArgumentException("검색어를 입력해주세요.");
         }
         return new ResponseEntity<>(reviewService.searchByKeyword(keyword), HttpStatus.OK);
-    }
-
-    @GetMapping("/{reviewId}")
-    public ResponseEntity<ReviewSearchResponseDto> findById(@PathVariable Long reviewId) {
-        Review review = reviewService.findById(reviewId);
-        ReviewSearchResponseDto dto = new ReviewSearchResponseDto(
-                review.getId(),
-                review.getContent(),
-                review.getBook().getTitle(),
-                review.getBook().getAuthor(),
-                review.getBook().getPublisher(),
-                review.getMember().getNickName()
-        );
-        return ResponseEntity.ok(dto);
     }
 
     */

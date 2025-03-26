@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @ExtendWith(MockitoExtension.class)
 @Nested
@@ -59,6 +61,50 @@ class ReviewApiControllerTest {
                 .standaloneSetup(reviewApiController)
                 .setControllerAdvice(apiExceptionAdvice)
                 .build();
+    }
+
+
+    @Nested
+    @DisplayName("독서 기록 조회 테스트")
+    class getTest {
+        @Test
+        @DisplayName("아이디 값으로 조회 성공")
+        void success() throws Exception {
+            // given
+            Long reviewId = 1L;
+            Review review = Review.builder()
+                            .id(reviewId)
+                            .score(10)
+                            .book(ReviewTestFixture.getBookEntity())
+                            .member(ReviewTestFixture.getMemberEntity())
+                            .build();
+            given(reviewService.findById(reviewId)).willReturn(review);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.get(BASE + "/" + reviewId)
+            );
+
+            // then
+            resultActions.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.reviewId").value(reviewId));
+        }
+
+        @Test
+        @DisplayName("없는 아이디 값으로 조회 시 404 반환")
+        void fail_not_found_returns404() throws Exception {
+            // given
+            Long anyId = 999L;
+            given(reviewService.findById(any(Long.class)))
+                    .willThrow(new ReviewException.ReviewNotFoundException());
+
+            // when & then
+            mockMvc.perform(
+                            get(BASE + "/" + anyId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message").value("존재하지 않는 독서 기록 입니다."));
+
+        }
     }
 
     @Nested
@@ -456,7 +502,7 @@ class ReviewApiControllerTest {
         }
 
         @Test
-        @DisplayName("검색 실패 - 파라미터 없음")
+        @DisplayName("검색 실패 - 모든 파라미터가 null이면 검색 실패")
         public void fail_no_param() throws Exception {
             mockMvc.perform(MockMvcRequestBuilders.get(BASE))
 					.andExpect(status().isBadRequest())
@@ -467,11 +513,28 @@ class ReviewApiControllerTest {
         }
 
         @Test
+        @DisplayName("검색 실패 - 모든 파라미터가 Blank면 검색 실패")
+        public void fail_balnk_param() throws Exception {
+            mockMvc.perform(MockMvcRequestBuilders.get(BASE)
+                            .param("keyword", "   ")
+                            .param("title", "   ")
+                            .param("author", "   ")
+                            .param("publisher", "   ")
+                            .param("memberName", "   "))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("검색 조건은 하나만 입력해야 합니다."));
+
+            verifyNoInteractions(reviewService);
+
+        }
+
+        @Test
         @DisplayName("검색 실패 - 파라미터 2개 이상")
         void fail_multiple_params() throws Exception {
             mockMvc.perform(MockMvcRequestBuilders.get(BASE)
                             .param("title", "Java")
-                            .param("author", "Smith"))
+                            .param("author", "Smith")
+                            )
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.message").value("검색 조건은 하나만 입력해야 합니다."));
 
