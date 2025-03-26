@@ -25,15 +25,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final MemberRepository memberRepository;
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(jwtAuthInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/signUp", "/signIn",
-                        "/api/v1/**", "/api/v1/members/verification",
-                        "/swagger-ui/**", "/v3/api-docs/**","/swagger-resources/**","/error");
-    }
-
-    @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new SignInMemberArgumentResolver(jwtUtil, memberRepository));
         resolvers.add(new SignInMemberIdArgumentResolver(jwtUtil));
