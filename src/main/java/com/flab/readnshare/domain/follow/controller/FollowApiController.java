@@ -27,7 +27,7 @@ import java.util.List;
 public class FollowApiController {
     private final FollowFacade followFacade;
 
-    @PostMapping("/{toMemberEmail}")
+    @PostMapping("/{memberEmail}")
     @Operation(summary = "팔로우", description = "특정 사용자를 팔로우할 때 사용하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "요청에 성공하였습니다."),
@@ -47,14 +47,14 @@ public class FollowApiController {
                             @ExampleObject(name = "존재하지 않는 회원 조회", value = "{ \"code\": \"MEMBER_NOT_FOUND\", \"message\": \"존재하지 않는 회원입니다.\" }")
                     }))
     })
-    @Parameter(name = "toMemberEmail", description = "팔로우 할 사용자 이메일", required = true)
+    @Parameter(name = "memberEmail", description = "팔로우 할 사용자 이메일", required = true)
     public ResponseEntity<Void> follow(
-            @PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String toMemberEmail,
+            @PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String memberEmail,
             @Parameter(hidden = true) @SignInMember Member fromMember) {
-        followFacade.follow(toMemberEmail, fromMember);
+        followFacade.follow(memberEmail, fromMember);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-    @DeleteMapping("/{toMemberEmail}")
+    @DeleteMapping("/{memberEmail}")
     @Operation(summary = "언팔로우", description = "특정 사용자를 언팔로우할 때 사용하는 API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청에 성공하였습니다."),
@@ -70,9 +70,9 @@ public class FollowApiController {
                             @ExampleObject(name = "존재하지 않는 회원 조회", value = "{ \"code\": \"MEMBER_NOT_FOUND\", \"message\": \"존재하지 않는 회원입니다.\" }")
                     }))
     })
-    @Parameter(name = "toMemberEmail", description = "언팔로우 할 사용자 이메일", required = true)
-    public ResponseEntity<Void> unfollow(@PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String toMemberEmail, @Parameter(hidden = true) @SignInMember Member fromMember) {
-        followFacade.unfollow(toMemberEmail, fromMember);
+    @Parameter(name = "memberEmail", description = "언팔로우 할 사용자 이메일", required = true)
+    public ResponseEntity<Void> unfollow(@PathVariable @Email(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$") String memberEmail, @Parameter(hidden = true) @SignInMember Member fromMember) {
+        followFacade.unfollow(memberEmail, fromMember);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
