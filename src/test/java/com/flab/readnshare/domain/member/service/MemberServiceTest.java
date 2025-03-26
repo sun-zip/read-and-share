@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -116,6 +117,37 @@ class MemberServiceTest {
             // then
             assertThrows(MemberException.DuplicateEmailException.class,
                     () -> memberService.signup(request));
+        }
+
+        @Test
+        @DisplayName("실패 - 이메일 전송 중 예외 발생")
+        void fail_emailSendingFailure() throws MessagingException {
+            // given
+            SignUpRequestDto request = SignUpRequestDto.builder()
+                    .email("test@naver.com")
+                    .password("test24680!")
+                    .nickName("testUser")
+                    .build();
+
+            when(passwordEncoder.encode(request.getPassword())).thenReturn("encodedPassword");
+            when(memberRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+            when(memberRepository.save(any(Member.class))).thenReturn(Member.builder()
+                    .email(request.getEmail())
+                    .password("encodedPassword")
+                    .nickName(request.getNickName())
+                    .build());
+
+            when(emailTokenRepository.save(any(EmailToken.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // 이메일 전송 시 강제로 예외 발생하도록 설정
+            doThrow(new MessagingException("이메일 전송 실패"))
+                    .when(emailService).sendVerificationEmail(anyString(), anyString());
+
+            // then
+            RuntimeException thrownException = assertThrows(RuntimeException.class,
+                    () -> memberService.signup(request));
+
+            assertEquals("이메일 인증 발송에 실패했습니다.", thrownException.getMessage());
         }
     }
 
@@ -298,4 +330,35 @@ class MemberServiceTest {
             assertThrows(ImageException.NotFoundImageException.class, () -> memberService.findByImageId(imageId));
         }
     }
+
+    @Nested
+    @DisplayName("delete 테스트")
+    class DeleteTest {
+
+        @Test
+        @DisplayName("성공")
+        void success() {
+            // given
+            Long memberId = 1L;
+            doNothing().when(memberRepository).deleteById(memberId);
+
+            // when
+            memberService.delete(memberId);
+
+            // then
+            verify(memberRepository, times(1)).deleteById(memberId);
+        }
+
+        @Test
+        @DisplayName("실패 - 존재하지 않는 회원 ID")
+        void fail_memberNotFound() {
+            // given
+            Long memberId = 999L;
+            doThrow(new EmptyResultDataAccessException(1)).when(memberRepository).deleteById(memberId);
+
+            // then
+            assertThrows(EmptyResultDataAccessException.class, () -> memberService.delete(memberId));
+        }
+    }
+
 }

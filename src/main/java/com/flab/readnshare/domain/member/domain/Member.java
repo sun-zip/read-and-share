@@ -26,9 +26,7 @@ public class Member extends BaseTimeEntity {
 
     @PrePersist
     public void setDefaultValues() {
-        if (this.profileImage == null) {
-            this.profileImage = 1L; // 기본값 설정
-        }
+        this.profileImage = 1L; // 기본값 설정
     }
 
     @Builder
