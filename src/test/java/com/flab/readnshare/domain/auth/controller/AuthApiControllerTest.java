@@ -14,6 +14,7 @@ import com.flab.readnshare.global.common.exception.MemberException;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,147 +63,173 @@ class AuthApiControllerTest {
                 .build();
     }
 
-    @Test
-    @DisplayName("로그인에 성공한다.")
-    void signin_success() throws Exception {
-        // given
-        SignInRequestDto request = AuthTestFixture.getSignInRequestDto();
+    @Nested
+    @DisplayName("signIn 테스트")
+    class SignInTests{
+        @Test
+        @DisplayName("로그인에 성공한다.")
+        void signin_success() throws Exception {
+            // given
+            SignInRequestDto request = AuthTestFixture.getSignInRequestDto();
 
-        given(authService.signIn(any(SignInRequestDto.class)))
-                .willReturn(MemberResponseDto.builder()
-                        .id(1L)
-                        .email(request.getEmail())
-                        .nickName("test")
-                        .build().toEntity());
+            given(authService.signIn(any(SignInRequestDto.class)))
+                    .willReturn(MemberResponseDto.builder()
+                            .id(1L)
+                            .email(request.getEmail())
+                            .nickName("test")
+                            .build().toEntity());
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new Gson().toJson(request))
+            );
 
-        // then
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(request.getEmail()));
+            // then
+            resultActions.andExpect(status().isOk())
+                    .andExpect(jsonPath("$.email").value(request.getEmail()));
+        }
+
+        @Test
+        @DisplayName("로그인에 실패한다.(존재하지 않는 회원)")
+        void signin_fail_email() throws Exception {
+            // given
+            SignInRequestDto request = AuthTestFixture.getSignInRequestDto();
+
+            when(authService.signIn(any(SignInRequestDto.class)))
+                    .thenThrow(new MemberException.MemberNotFoundException());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new Gson().toJson(request))
+            );
+
+            // then
+            resultActions.andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("로그인에 실패한다.(비밀번호 불일치)")
+        void signin_fail_password() throws Exception {
+            // given
+            SignInRequestDto request = AuthTestFixture.getSignInRequestDto();
+
+            when(authService.signIn(any(SignInRequestDto.class)))
+                    .thenThrow(new AuthException.InvalidPasswordException());
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new Gson().toJson(request))
+            );
+
+            // then
+            resultActions.andExpect(status().isBadRequest());
+        }
     }
 
-    @Test
-    @DisplayName("로그인에 실패한다.(존재하지 않는 회원)")
-    void signin_fail_email() throws Exception {
-        // given
-        SignInRequestDto request = AuthTestFixture.getSignInRequestDto();
+    @Nested
+    @DisplayName("refresh 테스트")
+    class RefreshTests{
+        @Test
+        @DisplayName("Access token 재발급에 성공한다.")
+        void refresh_success() throws Exception {
+            // given
+            MockCookie refreshTokenCookie = new MockCookie("refreshToken", "refreshTokenValue");
 
-        when(authService.signIn(any(SignInRequestDto.class)))
-                .thenThrow(new MemberException.MemberNotFoundException());
+            when(jwtUtil.extractMemberId(any(String.class))).thenReturn("1");
+            when(jwtUtil.validateToken(any(String.class))).thenReturn(JwtCode.ACCESS);
 
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(refreshTokenCookie)
+            );
 
-        // then
-        resultActions.andExpect(status().isNotFound());
+            // then
+            resultActions.andExpect(status().isOk());
+
+        }
+
+        @Test
+        @DisplayName("Access token 재발급에 실패한다. (refresh token이 없는 경우)")
+        void refresh_fail_null_token() throws Exception {
+            // given
+            MockCookie refreshTokenCookie = new MockCookie("refreshToken", null);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(refreshTokenCookie)
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("Access token 재발급에 실패한다. (refresh token이 이상한 값인 경우)")
+        void refresh_fail_denied_token() throws Exception {
+            // given
+            MockCookie refreshTokenCookie = new MockCookie("refreshToken", "refreshTokenValue");
+
+            when(jwtUtil.extractMemberId(any(String.class))).thenReturn("1");
+            when(jwtUtil.validateToken(any(String.class))).thenReturn(JwtCode.DENIED);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(refreshTokenCookie)
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("Access token 재발급에 실패한다. (refresh token이 만료된 경우)")
+        void refresh_fail_expired_token() throws Exception {
+            // given
+            MockCookie refreshTokenCookie = new MockCookie("refreshToken", "refreshTokenValue");
+
+            when(jwtUtil.extractMemberId(any(String.class))).thenReturn("1");
+            when(jwtUtil.validateToken(any(String.class))).thenReturn(JwtCode.EXPIRED);
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(refreshTokenCookie)
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
+        @Test
+        @DisplayName("Access token 재발급 실패 - memberId가 숫자가 아닌 경우")
+        void refresh_fail_memberId_not_number() throws Exception {
+            // given
+            MockCookie refreshTokenCookie = new MockCookie("refreshToken", "invalidToken");
+
+            // memberIdStr이 숫자가 아닌 잘못된 문자열을 반환하도록 설정
+            when(jwtUtil.extractMemberId(any(String.class))).thenReturn("not_a_number");
+
+            // when
+            ResultActions resultActions = mockMvc.perform(
+                    MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(refreshTokenCookie)
+            );
+
+            // then
+            resultActions.andExpect(status().isUnauthorized());
+        }
     }
-
-    @Test
-    @DisplayName("로그인에 실패한다.(비밀번호 불일치)")
-    void signin_fail_password() throws Exception {
-        // given
-        SignInRequestDto request = AuthTestFixture.getSignInRequestDto();
-
-        when(authService.signIn(any(SignInRequestDto.class)))
-                .thenThrow(new AuthException.InvalidPasswordException());
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(AUTH_SIGN_IN_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new Gson().toJson(request))
-        );
-
-        // then
-        resultActions.andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("Access token 재발급에 성공한다.")
-    void refresh_success() throws Exception {
-        // given
-        MockCookie refreshTokenCookie = new MockCookie("refreshToken", "refreshTokenValue");
-
-        when(jwtUtil.extractMemberId(any(String.class))).thenReturn("1");
-        when(jwtUtil.validateToken(any(String.class))).thenReturn(JwtCode.ACCESS);
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .cookie(refreshTokenCookie)
-        );
-
-        // then
-        resultActions.andExpect(status().isOk());
-
-    }
-
-    @Test
-    @DisplayName("Access token 재발급에 실패한다. (refresh token이 없는 경우)")
-    void refresh_fail_null_token() throws Exception {
-        // given
-        MockCookie refreshTokenCookie = new MockCookie("refreshToken", null);
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .cookie(refreshTokenCookie)
-        );
-
-        // then
-        resultActions.andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("Access token 재발급에 실패한다. (refresh token이 이상한 값인 경우)")
-    void refresh_fail_denied_token() throws Exception {
-        // given
-        MockCookie refreshTokenCookie = new MockCookie("refreshToken", "refreshTokenValue");
-
-        when(jwtUtil.extractMemberId(any(String.class))).thenReturn("1");
-        when(jwtUtil.validateToken(any(String.class))).thenReturn(JwtCode.DENIED);
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .cookie(refreshTokenCookie)
-        );
-
-        // then
-        resultActions.andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("Access token 재발급에 실패한다. (refresh token이 만료된 경우)")
-    void refresh_fail_expired_token() throws Exception {
-        // given
-        MockCookie refreshTokenCookie = new MockCookie("refreshToken", "refreshTokenValue");
-
-        when(jwtUtil.extractMemberId(any(String.class))).thenReturn("1");
-        when(jwtUtil.validateToken(any(String.class))).thenReturn(JwtCode.EXPIRED);
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(AUTH_REFRESH_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .cookie(refreshTokenCookie)
-        );
-
-        // then
-        resultActions.andExpect(status().isUnauthorized());
-    }
-
 }

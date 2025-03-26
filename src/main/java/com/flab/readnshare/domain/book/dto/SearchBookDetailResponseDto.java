@@ -24,9 +24,6 @@ public class SearchBookDetailResponseDto {
     }
 
     public Book toEntity() {
-        if (items.isEmpty()) {
-            throw new IllegalArgumentException("검색 결과가 없습니다.");
-        }
         Items item = items.get(0);
         return Book.builder()
                 .title(item.getTitle())

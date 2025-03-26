@@ -18,10 +18,11 @@ public class SearchBookResponseDto {
     private Integer display;
     private Integer totalPage;
     private Integer currentPage;
+    @Builder.Default
     List<Items> items = new ArrayList<>();
 
     @Getter
-    private static class Items {
+    public static class Items {
         private String title;
         private String image;
         private String author;

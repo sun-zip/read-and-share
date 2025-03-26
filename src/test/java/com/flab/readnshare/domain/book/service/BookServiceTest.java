@@ -1,5 +1,7 @@
 package com.flab.readnshare.domain.book.service;
 
+import com.flab.readnshare.domain.book.domain.Book;
+import com.flab.readnshare.domain.book.dto.BookDto;
 import com.flab.readnshare.domain.book.dto.SearchBookDetailResponseDto;
 import com.flab.readnshare.domain.book.dto.SearchBookResponseDto;
 import com.flab.readnshare.domain.book.repository.BookRepository;
@@ -19,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,10 +48,15 @@ public class BookServiceTest {
             int page = 2;
             int display = 10;
             int start = (page - 1) * display + 1;
+
+            SearchBookResponseDto.Items item = new SearchBookResponseDto.Items();
+            List<SearchBookResponseDto.Items> items = new ArrayList<>();
+            items.add(item);
+
             SearchBookResponseDto mockResponse = SearchBookResponseDto.builder()
                     .total(56)
                     .display(display)
-                    .items(new ArrayList<>())
+                    .items(items)
                     .build();
 
             ResponseEntity<SearchBookResponseDto> responseEntity = ResponseEntity.ok(mockResponse);
@@ -89,6 +97,31 @@ public class BookServiceTest {
 
             //then
             Assertions.assertNotNull(result);
+        }
+    }
+
+    @Nested
+    @DisplayName("save 테스트")
+    class SaveTests{
+        @Test
+        @DisplayName("성공")
+        public void success(){
+            BookDto dto = BookDto.builder()
+                    .title("1234")
+                    .isbn("isbn")
+                    .build();
+
+            Book savedBook = Book.builder()
+                    .title("1234")
+                    .isbn("isbn")
+                    .build();
+
+            when(bookRepository.save(any(Book.class)))
+                    .thenReturn(savedBook);
+
+            Book result = bookService.save(dto);
+
+            Assertions.assertEquals(savedBook, result);
         }
     }
 }

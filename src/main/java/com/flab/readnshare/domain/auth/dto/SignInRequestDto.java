@@ -17,12 +17,4 @@ public class SignInRequestDto {
         this.email = email;
         this.password = password;
     }
-
-    public Member toEntity(){
-        return Member.builder()
-                .email(email)
-                .password(password)
-                .build();
-    }
-
 }
