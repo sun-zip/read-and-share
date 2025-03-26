@@ -28,13 +28,13 @@ public class SignUpRequestDto {
         this.nickName = nickName;
     }
 
-    public Member toEntity(PasswordEncoder passwordEncoder){
-        return Member.builder()
-                .email(email)
-                .password(passwordEncoder.encode(password)) // 주입받은 passwordEncoder 사용
-                .nickName(nickName)
-                .build();
-    }
+//    public Member toEntity(PasswordEncoder passwordEncoder){
+//        return Member.builder()
+//                .email(email)
+//                .password(passwordEncoder.encode(password)) // 주입받은 passwordEncoder 사용
+//                .nickName(nickName)
+//                .build();
+//    }
 
 
 }

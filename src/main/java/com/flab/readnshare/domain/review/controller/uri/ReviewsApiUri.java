@@ -1,8 +1,0 @@
-package com.flab.readnshare.domain.review.controller.uri;
-
-public class ReviewsApiUri {
-	public static final String BASE = "/api/v1/reviews";
-	public static final String BY_ID = BASE + "/{reviewId}";
-	public static final String LIKE = BY_ID + "/likes";
-
-}

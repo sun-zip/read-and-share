@@ -1,7 +1,6 @@
 package com.flab.readnshare.domain.review.controller;
 
 import com.flab.readnshare.domain.member.domain.Member;
-import com.flab.readnshare.domain.review.controller.uri.ReviewsApiUri;
 import com.flab.readnshare.domain.review.dto.ReviewSearchCondition;
 import com.flab.readnshare.domain.review.dto.ReviewSearchResponseDto;
 import com.flab.readnshare.domain.review.dto.SaveReviewRequestDto;
@@ -21,7 +20,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping(ReviewsApiUri.BASE)
+@RequestMapping("/api/v1/reviews")
 public class ReviewApiController {
     private final ReviewService reviewService;
     private final ReviewFacade reviewFacade;
