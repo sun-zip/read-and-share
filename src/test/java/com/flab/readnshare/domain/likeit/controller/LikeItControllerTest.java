@@ -3,6 +3,7 @@ package com.flab.readnshare.domain.likeit.controller;
 
 import com.flab.readnshare.domain.likeit.service.LikeItService;
 import com.flab.readnshare.domain.member.domain.Member;
+import com.flab.readnshare.domain.review.controller.uri.ReviewsApiUri;
 import com.flab.readnshare.global.common.advice.ApiExceptionAdvice;
 import com.flab.readnshare.global.common.exception.ReviewException;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +54,7 @@ public class LikeItControllerTest {
 			Member mockMember = Member.builder().id(1L).nickName("tester").build();
 
 			// when & then
-			mockMvc.perform(post("/api/v1/review/{reviewId}/like", reviewId)
+			mockMvc.perform(post(ReviewsApiUri.LIKE, reviewId)
 					.requestAttr("signInMember", mockMember))
 					.andExpect(status().isOk());
 
@@ -71,7 +72,7 @@ public class LikeItControllerTest {
 			doThrow(new ReviewException.ReviewNotFoundException())
 					.when(likeItService).toggleLikeIt(eq(reviewId), any(Member.class));
 
-			mockMvc.perform(post("/api/v1/review/{reviewId}/like", reviewId)
+			mockMvc.perform(post(ReviewsApiUri.LIKE, reviewId)
 							.requestAttr("signInMember", mockMember))
 					.andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.message").value("존재하지 않는 독서 기록 입니다."));
