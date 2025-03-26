@@ -107,6 +107,13 @@ public class ApiExceptionAdvice {
                 .body(Map.of("message", e.getMessage()));
     }
 
+    @ExceptionHandler(ReviewException.ReviewNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleReviewNotFound(ReviewException.ReviewNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("REVIEW_NOT_FOUND", ex.getMessage()));
+    }
+
+
     @ExceptionHandler(MissingRequestCookieException.class)
     public ResponseEntity missingRequestCookieExceptionHandler(MissingRequestCookieException ex) {
         ErrorResponse response = new ErrorResponse(ErrorCode.JWT_NULL);

@@ -52,11 +52,11 @@ public class ReviewService {
         return review.getId();
     }
 
-    @Recover
-    public Long recover(ObjectOptimisticLockingFailureException ex, Long reviewId, Member signInMember, UpdateReviewRequestDto dto) {
-        log.error("review update failed... error: {}", ex.getMessage());
-        throw ex;
-    }
+//    @Recover
+//    public Long recover(ObjectOptimisticLockingFailureException ex, Long reviewId, Member signInMember, UpdateReviewRequestDto dto) {
+//        log.error("review update failed... error: {}", ex.getMessage());
+//        throw ex;
+//    }
 
     @Transactional
     public void delete(Long reviewId, Member signInMember) {

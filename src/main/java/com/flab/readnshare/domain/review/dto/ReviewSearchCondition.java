@@ -21,4 +21,12 @@ public class ReviewSearchCondition {
 		return count;
 	}
 
+	public String inputArgument() {
+		if (getTitle() != null) return "title";
+		if (getAuthor() != null) return "author";
+		if (getPublisher() != null) return "publisher";
+		if (getMemberName() != null) return "memberName";
+		else return "keyword";
+	}
+
 }

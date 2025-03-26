@@ -91,7 +91,6 @@ class ReviewServiceTest {
             assertThat(savedReviewId).isEqualTo(1L);
             verify(reviewRepository, times(1)).save(any(Review.class));
         }
-
     }
 
 
@@ -119,6 +118,52 @@ class ReviewServiceTest {
 
             // when & then
             assertThrows(ReviewException.ReviewNotFoundException.class, () -> reviewService.findById(1L));
+        }
+    }
+
+    @Nested
+    @DisplayName("여러 ID로 조회 테스트")
+    class findByIdInTest {
+        @Test
+        @DisplayName("여러개의 ID로 조회 성공")
+        void success() {
+            // given
+            Review review1 = Review.builder()
+                    .id(1L)
+                    .content("My First Review!")
+                    .member(member)
+                    .book(book)
+                    .build();
+            Review review2 = Review.builder()
+                    .id(2L)
+                    .content("My Second Review!")
+                    .member(member)
+                    .book(book)
+                    .build();
+            Review review3 = Review.builder()
+                    .id(3L)
+                    .content("My Third Review!")
+                    .member(member)
+                    .book(book)
+                    .build();
+
+            when(reviewRepository.findByIdIn(any(List.class))).thenReturn(List.of(review1, review2, review3));
+
+            // when
+            List<Review> result = reviewService.findByIdIn(List.of(1L, 2L, 3L));
+
+            // then
+            assertThat(result).hasSize(3);
+        }
+
+        @Test
+        @DisplayName("리뷰 ID로 조회 실패 - ID 없음")
+        void find_review_fail_no_id() {
+            // given
+            when(reviewRepository.findByIdIn(any(List.class))).thenReturn(List.of());
+
+            // when & then
+            assertThat(reviewService.findByIdIn(List.of(1L,2L,3L))).isEmpty();
         }
     }
 
@@ -162,6 +207,25 @@ class ReviewServiceTest {
         }
 
         @Test
+        @DisplayName("내용과 별점 수정")
+        void content_and_score() {
+            // given
+            Integer newScore = 8;
+            UpdateReviewRequestDto request = new UpdateReviewRequestDto("Updated content", newScore);
+            Review existReview = ReviewTestFixture.getReviewEntity();
+            existReview.updateScore(7); // 초기 score: 7점으로 세팅
+
+            when(reviewRepository.findByIdForUpdate(any(Long.class))).thenReturn(Optional.of(existReview));
+
+            // when
+            Long updatedReviewId = reviewService.update(existReview.getId(), existReview.getMember(), request);
+
+            // then
+            assertThat(existReview.getScore()).isEqualTo(newScore);
+            assertThat(existReview.getContent()).isEqualTo(request.getContent());
+        }
+
+        @Test
         @DisplayName("독서 기록 작성자와 수정자가 다르면 예외가 발생한다")
         void fail_mismatch_member() {
             // given
@@ -172,6 +236,34 @@ class ReviewServiceTest {
 
             assertThrows(ReviewException.ForbiddenMemberException.class
                     , () -> reviewService.update(existReview.getId(), mock(Member.class), request));
+        }
+
+        @Test
+        @DisplayName("수정하려는 회원이 null이면 예외가 발생한다.")
+        void fail_null_member_access() {
+            // given
+            UpdateReviewRequestDto request = ReviewTestFixture.getUpdateReviewRequestDto();
+            Review existReview = ReviewTestFixture.getReviewEntity();
+
+            when(reviewRepository.findByIdForUpdate(any(Long.class))).thenReturn(Optional.of(existReview));
+
+            assertThrows(ReviewException.ForbiddenMemberException.class
+                    , () -> reviewService.update(existReview.getId(), null, request));
+        }
+
+        public static class FakeMember extends Member {}
+
+        @Test
+        @DisplayName("수정하려는 회원에 다른 데이터가 들어가면 예외가 발생한다.")
+        void fail_unavailable_member_access() {
+            // given
+            UpdateReviewRequestDto request = ReviewTestFixture.getUpdateReviewRequestDto();
+            Review existReview = ReviewTestFixture.getReviewEntity();
+
+            when(reviewRepository.findByIdForUpdate(any(Long.class))).thenReturn(Optional.of(existReview));
+
+            assertThrows(ReviewException.ForbiddenMemberException.class
+                    , () -> reviewService.update(existReview.getId(), mock(FakeMember.class), request));
         }
 
         @Test

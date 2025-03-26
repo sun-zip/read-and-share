@@ -44,6 +44,7 @@ dependencies {
 	// test
 	testImplementation('com.google.code.gson:gson:2.10.1')
 
+
 	// monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
