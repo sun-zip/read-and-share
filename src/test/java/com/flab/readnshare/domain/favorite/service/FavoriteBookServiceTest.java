@@ -9,6 +9,7 @@ import com.flab.readnshare.domain.favorite.domain.FavoriteBook;
 import com.flab.readnshare.domain.favorite.repository.FavoriteBookRepository;
 import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.service.MemberService;
+import com.flab.readnshare.global.common.exception.BookException;
 import com.flab.readnshare.global.common.exception.FavoriteException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -123,6 +124,42 @@ class FavoriteBookServiceTest {
             // Then: 즐겨찾기 저장(save)이 1회 호출되었는지 검증
             verify(favoriteBookRepository, times(1)).save(any(FavoriteBook.class));
 
+        }
+        @Test
+        @DisplayName("즐겨찾기 추가 실패 - 도서 검색 결과가 null")
+        void fail_bookNotFound() {
+            Member member = Member.builder().id(1L).build();
+            String isbn = "12345";
+
+            when(bookRepository.findByIsbn(isbn)).thenReturn(Optional.empty());
+            when(bookService.searchBookDetail(isbn)).thenReturn(null);
+
+            assertThrows(BookException.BookNotFound.class, () -> {
+                favoriteBookService.addFavorite(member, isbn);
+            });
+
+            verify(bookRepository, never()).save(any());
+            verify(favoriteBookRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("즐겨찾기 추가 실패 - 도서 검색 결과 items가 비어있음")
+        void fail_bookDetailResponseItemsEmpty() {
+            Member member = Member.builder().id(1L).build();
+            String isbn = "12345";
+
+            when(bookRepository.findByIsbn(isbn)).thenReturn(Optional.empty());
+
+            // 비어있는 items
+            SearchBookDetailResponseDto emptyResponse = new SearchBookDetailResponseDto();
+            when(bookService.searchBookDetail(isbn)).thenReturn(emptyResponse);
+
+            assertThrows(BookException.BookNotFound.class, () -> {
+                favoriteBookService.addFavorite(member, isbn);
+            });
+
+            verify(bookRepository, never()).save(any());
+            verify(favoriteBookRepository, never()).save(any());
         }
 
         @Test
