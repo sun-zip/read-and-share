@@ -1,56 +1,78 @@
-name: CD
+name: Dev CI on WSL Runner
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - develop        # dev 브랜치에 대한 push 이벤트에만 트리거
+  pull_request:
+    branches:
+      - develop        # (선택) PR이 dev 브랜치로 생성/병합될 때도 트리거
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: self-hosted  # 앞서 등록한 WSL 러너에서 실행
+
+    env:
+      DATA_REDIS_HOST: ${{ secrets.DATA_REDIS_HOST }}
+      DB_URL: ${{ secrets.DB_URL }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_DRIVER: ${{ secrets.DB_DRIVER }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      JPA_DDI: ${{ secrets.JPA_DDI }}
+      JPA_DDL_AUTO: ${{ secrets.JPA_DDL_AUTO }}
+      NAVER_BOOK_ID: ${{ secrets.NAVER_BOOK_ID }}
+      NAVER_BOOK_SECRET: ${{ secrets.NAVER_BOOK_SECRET }}
+      SQL_INIT_MODE: ${{ secrets.SQL_INIT_MODE }}
 
     steps:
-      - name: Checkout Repository
+      # 코드 가져오기
+      - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Create application-prod.yml
-        run: |
-          echo "${{ secrets.APPLICATION_YML_PROD }}" > src/main/resources/application-prod.yml
-        shell: bash
-
-      - name: Create Firebase Directory & JSON
-        run: |
-          mkdir -p src/main/resources/firebase
-          echo '${{ secrets.FIREBASE_ADMIN_JSON }}' > src/main/resources/firebase/readnshare-firebase-adminsdk.json
-        shell: bash
-
-      - name: Grant Execute Permission for Gradlew
+      - name: Grant execute permission to gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Debug env variables
+        run: |
+          echo "DB_URL = $DB_URL"
+          echo "DB_USERNAME = $DB_USERNAME"
+          echo "DB_PASSWORD = $DB_PASSWORD"
+
+      # Gradle 빌드 및 테스트
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Stop existing app
+        if: ${{ success() }}
+        run: |
+          # 실행 중인 기존 Spring Boot 애플리케이션 종료
+          pkill -f 'java.*readnshare-0.0.1-SNAPSHOT.jar' || echo "No running instance found."
+
+      - name: Build new JAR
+        if: ${{ success() }}
         run: ./gradlew build -x test
 
-      - name: Docker Build & Push
+      - name: Launch updated app
+        if: ${{ success() }}
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/readnshare .
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-          docker push ${{ secrets.DOCKER_USERNAME }}/readnshare
+          echo "📦 현재 디렉토리: $(pwd)"
+          echo "📁 libs 내부 파일 목록:"
+          ls -lh build/libs
+          echo "🚀 Spring Boot 애플리케이션 실행 중..."
+          sudo systemctl stop sunzip_readnshare || echo "서비스가 안 켜져 있었음"
+          sudo systemctl start sunzip_readnshare
+          sleep 5
+          echo "📃 실행 로그 미리보기 (app.log):"
+          head -n 500 app.log || echo "(로그 없음)"
 
-      - name: Deploy with Docker Compose via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          username: ${{ secrets.SERVER_USERNAME }}
-          host: ${{ secrets.SERVER_HOST }}
-          key: ${{ secrets.SERVER_PRIVATE_KEY }}
-          port: ${{ secrets.SERVER_PORT }}
-          script_stop: true
-          script: |
-            cd /home/compose
-            docker-compose pull
-            docker-compose up -d --no-deps
-            docker image prune -af
+      - name: Check if app is running
+        if: ${{ success() }}
+        run: |
+          echo "🔍 실행 중인 Java 프로세스:"
+          pgrep -af 'java'
+
+      - name: Restart Spring Boot service
+        if: ${{ success() }}
+        run: |
+
