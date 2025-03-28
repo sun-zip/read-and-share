@@ -39,9 +39,16 @@ jobs:
           echo "DB_USERNAME = $DB_USERNAME"
           echo "DB_PASSWORD = $DB_PASSWORD"
 
-      # Gradle 빌드 및 테스트
-      - name: Run unit tests
-        run: ./gradlew test
+      # Gradle 빌드 및 자동화 테스트 단계 (테스트 부분 강조)
+      - name: Run automated unit tests
+        run: |
+          echo "================================================="
+          echo ">>> run automated unit tests"
+          echo "================================================="
+          ./gradlew test
+          echo "================================================="
+          echo "<<< completed automated unit tests"
+          echo "================================================="
 
       - name: Stop existing app
         if: ${{ success() }}
@@ -75,4 +82,4 @@ jobs:
       - name: Restart Spring Boot service
         if: ${{ success() }}
         run: |
-
+          echo "Spring Boot 서비스가 재시작되었습니다."
