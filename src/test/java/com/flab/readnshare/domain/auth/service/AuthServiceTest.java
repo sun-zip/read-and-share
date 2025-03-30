@@ -8,6 +8,7 @@ import com.flab.readnshare.domain.member.domain.Member;
 import com.flab.readnshare.domain.member.repository.MemberRepository;
 import com.flab.readnshare.global.common.auth.jwt.JwtUtil;
 import com.flab.readnshare.global.common.exception.AuthException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -155,24 +156,37 @@ class AuthServiceTest {
             String oldRefreshToken = "oldTokenValue";
             Long memberId = 1L;
             HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+            HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+
+            // 클라이언트 IP 설정
+            String clientIp = "127.0.0.1";
+            when(request.getRemoteAddr()).thenReturn(clientIp);
+
+            // 저장된 RefreshToken 객체 (클라이언트 IP가 일치하는 경우)
+            RefreshToken storedToken = RefreshToken.builder()
+                    .refreshTokenValue(oldRefreshToken)
+                    .memberId(memberId)
+                    .ipAddress(clientIp)
+                    .expiration(1000000L)
+                    .build();
+            when(refreshTokenRepository.findById(oldRefreshToken)).thenReturn(Optional.of(storedToken));
 
             String newAccessToken = "newAccessToken";
             String newRefreshToken = "newRefreshToken";
 
             when(jwtUtil.createAccessToken(memberId)).thenReturn(newAccessToken);
-            when(jwtUtil.createRefreshToken(memberId)).thenReturn(newRefreshToken);
+            // 수정된 createRefreshToken 메서드는 memberId와 IP 정보를 인자로 받음
+            when(jwtUtil.createRefreshToken(memberId, clientIp)).thenReturn(newRefreshToken);
 
             // when
-            authService.updateRefreshToken(response, memberId, oldRefreshToken);
+            authService.updateRefreshToken(request,response, memberId, oldRefreshToken);
 
             // then
             verify(refreshTokenRepository).deleteById(oldRefreshToken);
             verify(jwtUtil).createAccessToken(memberId);
-            verify(jwtUtil).createRefreshToken(memberId);
+            verify(jwtUtil).createRefreshToken(memberId, clientIp);
             verify(jwtUtil).setAccessTokenHeader(response, newAccessToken);
             verify(jwtUtil).setRefreshTokenCookie(response, newRefreshToken);
-
-
         }
     }
 }

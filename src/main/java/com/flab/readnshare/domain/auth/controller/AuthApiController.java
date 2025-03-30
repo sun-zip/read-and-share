@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +43,10 @@ public class AuthApiController {
                     @ExampleObject(name = "아이디 또는 패스워드 에러", value = "{ \"code\": \"INVALID_EMAIL_OR_PASSWORD\", \"message\": \"이메일 또는 패스워드가 일치하지 않습니다.\" }"),
             }))
     })
-    public ResponseEntity<MemberResponseDto> signIn(@RequestBody @Valid SignInRequestDto dto, HttpServletResponse response) {
+    public ResponseEntity<MemberResponseDto> signIn(@RequestBody @Valid SignInRequestDto dto, HttpServletRequest request, HttpServletResponse response) {
         Member member = authService.signIn(dto);
         // access token, refresh token 발급
-        authService.issueTokens(response, member.getId());
+        authService.issueTokens(request, response, member.getId());
         return new ResponseEntity<>(MemberResponseDto.from(member), HttpStatus.OK);
     }
 
@@ -63,7 +64,7 @@ public class AuthApiController {
                             @ExampleObject(name = "형식에 맞지 않는 토큰", value = "{ \"code\": \"JWT_DENIED\", \"message\": \"조작되거나 지원되지 않는 토큰입니다.\" }")
                     }))
     })
-    public ResponseEntity<Void> refresh(@CookieValue(value = "refreshToken") Cookie cookie, HttpServletResponse response) {
+    public ResponseEntity<Void> refresh(@CookieValue(value = "refreshToken") Cookie cookie, HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = extractRefreshTokenFromCookie(cookie);
         Long memberId = extractMemberIdFromToken(refreshToken);
 
@@ -75,7 +76,7 @@ public class AuthApiController {
                 // refresh token 검증 후 access token 재발급
                 authService.validateTokenFromRedis(refreshToken);
                 // access token 재발급 및 리프레쉬 토큰 로테이션
-                authService.updateRefreshToken(response, memberId, refreshToken);
+                authService.updateRefreshToken(request, response, memberId, refreshToken);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
         }
