@@ -70,7 +70,7 @@ public class JwtUtil {
      * @param memberId 회원의 ID
      * @return 생성된 리프레시 토큰 문자열
      */
-    public String createRefreshToken(Long memberId) {
+    public String createRefreshToken(Long memberId, String ipAddress) {
         Claims claims = Jwts.claims().setSubject(String.valueOf(memberId));
         Date now = new Date();
 
@@ -85,6 +85,7 @@ public class JwtUtil {
         RefreshToken redisRefreshToken = RefreshToken.builder()
                 .refreshTokenValue(refreshToken)
                 .memberId(memberId)
+                .ipAddress(ipAddress)
                 .expiration(refreshTokenValidTime)
                 .build();
 

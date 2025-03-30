@@ -22,14 +22,18 @@ public class RefreshToken {
     // RefreshToken과 연관된 회원의 ID
     private Long memberId;
 
+    // RefreshToken을 발급한 클라이언트의 IP 주소
+    private String ipAddress;
+
     // Redis에서의 만료 시간을 밀리초 단위로 설정
     @TimeToLive(unit = TimeUnit.MILLISECONDS)
     private Long expiration;
 
     @Builder
-    public RefreshToken(String refreshTokenValue, Long memberId, Long expiration) {
+    public RefreshToken(String refreshTokenValue, Long memberId,String ipAddress, Long expiration) {
         this.refreshTokenValue = refreshTokenValue;
         this.memberId = memberId;
+        this.ipAddress = ipAddress;
         this.expiration = expiration;
     }
 }
